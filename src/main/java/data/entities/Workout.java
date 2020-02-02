@@ -13,7 +13,7 @@ public class Workout {
 
     private int day;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.PERSIST)
     private List<UserExercise> userExercises;
 
     public Workout() {

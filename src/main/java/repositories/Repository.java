@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.List;
 
 public class Repository {
 
@@ -19,7 +20,7 @@ public class Repository {
             .createEntityManagerFactory("RoarFitPU")
             .createEntityManager();
 
-    public String init() {
+    public Repository() {
         // load templates
         URL url = Thread.currentThread()
                 .getContextClassLoader()
@@ -32,11 +33,15 @@ public class Repository {
                 em.getTransaction().begin();
                 for (int i = 0; i < jsonArray.length(); ++i) {
                     JSONObject json = jsonArray.getJSONObject(i);
+
                     ExerciseTemplate template = new ExerciseTemplate(
                             json.getString("name"),
-                            json.getString("equipment"),
                             json.getEnum(BodyPart.class, "bodyPart")
                     );
+                    if (!json.isNull("equipment")) {
+                        template.setEquipment(json.getString("equipment"));
+                    }
+
                     em.persist(template);
                 }
                 em.getTransaction().commit();
@@ -47,11 +52,18 @@ public class Repository {
             throw new RuntimeException("Exercise templates file not found");
         }
 
+        createPlaceholders();
+    }
+
+    private void createPlaceholders() {
         // create user
-        User user = new User();
+        User user = new User("Max", "Mustermann");
         em.getTransaction().begin();
         em.persist(user);
         em.getTransaction().commit();
+
+        List<ExerciseTemplate> templates
+                = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
 
         // create workoutPlan
         Calendar warmup = Calendar.getInstance();
@@ -68,18 +80,22 @@ public class Repository {
 
         // create workouts
         Workout workout1 = new Workout(1);
-
-        UserExercise userExercise = new UserExercise();
+        UserExercise userExercise1 = new UserExercise(templates.get(1), 3, 5);
+        UserExercise userExercise2 = new UserExercise(templates.get(2), 3, 6);
+        workout1.getUserExercises().add(userExercise1);
+        workout1.getUserExercises().add(userExercise2);
 
         Workout workout2 = new Workout(2);
-        Workout workout3 = new Workout(3);
+        UserExercise userExercise3 = new UserExercise(templates.get(4), 5, 10);
+        UserExercise userExercise4 = new UserExercise(templates.get(5), 2, 4);
+        workout2.getUserExercises().add(userExercise3);
+        workout2.getUserExercises().add(userExercise4);
 
+        workoutPlan.getWorkouts().add(workout1);
+        workoutPlan.getWorkouts().add(workout2);
 
         em.getTransaction().begin();
         user.getWorkoutPlans().add(workoutPlan);
         em.getTransaction().commit();
-
-
-        return "Initialised";
     }
 }

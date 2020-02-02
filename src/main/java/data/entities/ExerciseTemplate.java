@@ -20,9 +20,8 @@ public class ExerciseTemplate {
     public ExerciseTemplate() {
     }
 
-    public ExerciseTemplate(String name, String equipment, BodyPart bodyPart) {
+    public ExerciseTemplate(String name, BodyPart bodyPart) {
         this.name = name;
-        this.equipment = equipment;
         this.bodyPart = bodyPart;
     }
 

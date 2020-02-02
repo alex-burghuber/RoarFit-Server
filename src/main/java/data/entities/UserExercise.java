@@ -9,7 +9,7 @@ public class UserExercise {
     @GeneratedValue
     private long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.PERSIST)
     private ExerciseTemplate template;
 
     private int sets;

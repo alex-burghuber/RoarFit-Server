@@ -14,7 +14,7 @@ public class User {
     private String firstName;
     private String lastName;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.PERSIST)
     private List<WorkoutPlan> workoutPlans;
 
     public User() {

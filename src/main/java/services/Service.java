@@ -17,10 +17,4 @@ public class Service {
     public String greetings() {
         return "hello";
     }
-
-    @Path("/init")
-    @GET
-    public String init() {
-        return repository.init();
-    }
 }

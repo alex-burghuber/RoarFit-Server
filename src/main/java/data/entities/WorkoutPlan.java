@@ -20,7 +20,7 @@ public class WorkoutPlan {
     @Temporal(value = TemporalType.TIME)
     private Calendar cooldown;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.PERSIST)
     private List<Workout> workouts;
 
     public WorkoutPlan() {
