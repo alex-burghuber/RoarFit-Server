@@ -4,8 +4,11 @@
              xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
     <persistence-unit name="RoarFitPU" transaction-type="RESOURCE_LOCAL">
         <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-        <class>entities.User</class>
-        <class>entities.WorkoutPlan</class>
+        <class>data.entities.User</class>
+        <class>data.entities.WorkoutPlan</class>
+        <class>data.entities.Workout</class>
+        <class>data.entities.UserExercise</class>
+        <class>data.entities.ExerciseTemplate</class>
         <properties>
             <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3306/roarfitdb"/>
             <property name="javax.persistence.jdbc.user" value="RoarFit"/>
