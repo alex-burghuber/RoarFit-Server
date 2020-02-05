@@ -2,12 +2,15 @@ package repositories;
 
 import data.entities.*;
 import data.enums.BodyPart;
+import helper.EntityManagerHelper;
+import helper.JwtHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Persistence;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -16,11 +19,15 @@ import java.util.List;
 
 public class Repository {
 
-    private EntityManager em = Persistence
-            .createEntityManagerFactory("RoarFitPU")
-            .createEntityManager();
+    private EntityManager em;
+    private JwtHelper jwtHelper;
 
-    public Repository() {
+    private static Repository repository;
+
+    private Repository() {
+        em = EntityManagerHelper.getInstance();
+        jwtHelper = new JwtHelper();
+
         // load templates
         URL url = Thread.currentThread()
                 .getContextClassLoader()
@@ -55,9 +62,16 @@ public class Repository {
         createPlaceholders();
     }
 
+    public static Repository getInstance() {
+        if (repository == null) {
+            repository = new Repository();
+        }
+        return repository;
+    }
+
     private void createPlaceholders() {
         // create user
-        User user = new User("Max", "Mustermann");
+        User user = new User(8387, "Alex123", "123ALEXtest", "Max", "Mustermann");
         em.getTransaction().begin();
         em.persist(user);
         em.getTransaction().commit();
@@ -97,5 +111,46 @@ public class Repository {
         em.getTransaction().begin();
         user.getWorkoutPlans().add(workoutPlan);
         em.getTransaction().commit();
+    }
+
+    public Response login(String username, String password) {
+        // check if an user with this username exists
+        List<User> results = em.createQuery("select u from User u where u.username = :username", User.class)
+                .setParameter("username", username)
+                .getResultList();
+        if (results.size() != 0) {
+            User user = results.get(0);
+            // check if the password is correct
+            if (user.getPassword().equals(password)) {
+
+                String jwt = jwtHelper.create(user.getId());
+                JSONObject json = new JSONObject()
+                        .put("token", jwt);
+                return Response.ok(json.toString()).build();
+            }
+        }
+        return Response.status(Response.Status.UNAUTHORIZED).build();
+    }
+
+    public Response getCustomer(String jwt, long customerNumber) {
+        // for jwt validation
+        getUserFromJwt(jwt);
+
+        User user = em.find(User.class, customerNumber);
+
+        JSONObject json = new JSONObject()
+                .put("firstName", user.getFirstName())
+                .put("lastName", user.getLastName());
+
+        return Response.ok(json.toString()).build();
+    }
+
+    private User getUserFromJwt(String jwt) {
+        long id = jwtHelper.getUserId(jwt);
+        User user = em.find(User.class, id);
+        if (user == null) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        }
+        return user;
     }
 }
