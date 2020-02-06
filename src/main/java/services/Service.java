@@ -18,7 +18,7 @@ public class Service {
     @Path("/hello")
     @GET
     public String greetings() {
-        return "hello";
+        return "ello";
     }
 
     @Path("/login")
@@ -29,12 +29,11 @@ public class Service {
         return repository.login(login.getUsername(), login.getPassword());
     }
 
-    @Path("/customers/customer/{customerNumber}")
+    @Path("/user")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getCustomer(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
-                                @PathParam("customerNumber") long customerNumber) {
-        return repository.getCustomer(getJwt(auth), customerNumber);
+    public Response getUser(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth) {
+        return repository.getUser(getJwt(auth));
     }
 
     private String getJwt(String auth) {

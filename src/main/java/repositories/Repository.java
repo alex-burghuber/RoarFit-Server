@@ -132,13 +132,11 @@ public class Repository {
         return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
-    public Response getCustomer(String jwt, long customerNumber) {
-        // for jwt validation
-        getUserFromJwt(jwt);
-
-        User user = em.find(User.class, customerNumber);
+    public Response getUser(String jwt) {
+        User user = getUserFromJwt(jwt);
 
         JSONObject json = new JSONObject()
+                .put("userId", user.getId())
                 .put("firstName", user.getFirstName())
                 .put("lastName", user.getLastName());
 
