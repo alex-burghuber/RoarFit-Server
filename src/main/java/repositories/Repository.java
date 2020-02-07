@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -21,12 +22,14 @@ public class Repository {
 
     private EntityManager em;
     private JwtHelper jwtHelper;
+    private SimpleDateFormat formatter;
 
     private static Repository repository;
 
     private Repository() {
         em = EntityManagerHelper.getInstance();
         jwtHelper = new JwtHelper();
+        formatter = new SimpleDateFormat("mm:ss");
 
         // load templates
         URL url = Thread.currentThread()
@@ -71,9 +74,11 @@ public class Repository {
 
     private void createPlaceholders() {
         // create user
-        User user = new User(8387, "Alex123", "123ALEXtest", "Max", "Mustermann");
+        User user1 = new User(8387, "Alex123", "123ALEXtest", "Alex", "Burg");
+        User user2 = new User(8383, "danielpfeffer", "pfefferIsyes", "Mr", "Pepper");
         em.getTransaction().begin();
-        em.persist(user);
+        em.persist(user1);
+        em.persist(user2);
         em.getTransaction().commit();
 
         List<ExerciseTemplate> templates
@@ -90,7 +95,7 @@ public class Repository {
         cooldown.set(Calendar.MINUTE, 17);
         cooldown.set(Calendar.SECOND, 50);
 
-        WorkoutPlan workoutPlan = new WorkoutPlan("Starting Strength", warmup, cooldown);
+        WorkoutPlan workoutPlan1 = new WorkoutPlan("Starting Strength", warmup, cooldown);
 
         // create workouts
         Workout workout1 = new Workout(1);
@@ -105,11 +110,30 @@ public class Repository {
         workout2.getUserExercises().add(userExercise3);
         workout2.getUserExercises().add(userExercise4);
 
-        workoutPlan.getWorkouts().add(workout1);
-        workoutPlan.getWorkouts().add(workout2);
+        workoutPlan1.getWorkouts().add(workout1);
+        workoutPlan1.getWorkouts().add(workout2);
+
+        WorkoutPlan workoutPlan2 = new WorkoutPlan("Starting Strength", warmup, cooldown);
+
+        // create workouts
+        Workout workout3 = new Workout(1);
+        UserExercise userExercise5 = new UserExercise(templates.get(1), 3, 5);
+        UserExercise userExercise6 = new UserExercise(templates.get(2), 3, 6);
+        workout1.getUserExercises().add(userExercise5);
+        workout1.getUserExercises().add(userExercise6);
+
+        Workout workout4 = new Workout(2);
+        UserExercise userExercise7 = new UserExercise(templates.get(4), 5, 10);
+        UserExercise userExercise8 = new UserExercise(templates.get(5), 2, 4);
+        workout2.getUserExercises().add(userExercise7);
+        workout2.getUserExercises().add(userExercise8);
+
+        workoutPlan2.getWorkouts().add(workout3);
+        workoutPlan2.getWorkouts().add(workout4);
 
         em.getTransaction().begin();
-        user.getWorkoutPlans().add(workoutPlan);
+        user1.getWorkoutPlans().add(workoutPlan1);
+        user2.getWorkoutPlans().add(workoutPlan2);
         em.getTransaction().commit();
     }
 
@@ -136,11 +160,36 @@ public class Repository {
         User user = getUserFromJwt(jwt);
 
         JSONObject json = new JSONObject()
-                .put("userId", user.getId())
+                .put("id", user.getId())
                 .put("firstName", user.getFirstName())
                 .put("lastName", user.getLastName());
 
         return Response.ok(json.toString()).build();
+    }
+
+    public Response getWorkoutPlans(String jwt) {
+        User user = getUserFromJwt(jwt);
+
+        JSONArray workoutPlansJson = new JSONArray();
+        for (WorkoutPlan plan : user.getWorkoutPlans()) {
+            JSONObject planJson = new JSONObject()
+                    .put("id", plan.getId())
+                    .put("name", plan.getName())
+                    .put("warmup", formatter.format(plan.getWarmup().getTime()))
+                    .put("cooldown", formatter.format(plan.getCooldown().getTime()));
+
+            JSONArray workoutsJson = new JSONArray();
+            for (Workout workout : plan.getWorkouts()) {
+                JSONObject workoutJson = new JSONObject()
+                        .put("id", workout.getId())
+                        .put("day", workout.getDay());
+                workoutsJson.put(workoutJson);
+            }
+            planJson.put("workouts", workoutsJson);
+
+            workoutPlansJson.put(planJson);
+        }
+        return Response.ok(workoutPlansJson.toString()).build();
     }
 
     private User getUserFromJwt(String jwt) {
