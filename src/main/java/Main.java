@@ -7,6 +7,8 @@ import repositories.Repository;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Main {
@@ -33,6 +35,14 @@ public class Main {
 
         ResourceConfig rc = new ResourceConfig().packages("services", "filters");
         HttpServer server = GrizzlyHttpServerFactory.createHttpServer(URI.create(BASE_URI), rc);
+
+        // activate error logging in the console
+        Logger l = Logger.getLogger("org.glassfish.grizzly.http.server.HttpHandler");
+        l.setLevel(Level.FINE);
+        l.setUseParentHandlers(false);
+        ConsoleHandler ch = new ConsoleHandler();
+        ch.setLevel(Level.FINE);
+        l.addHandler(ch);
 
         try {
             System.out.println("Server is listening at " + BASE_URI);

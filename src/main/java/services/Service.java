@@ -36,11 +36,19 @@ public class Service {
         return repository.getUser(getJwt(auth));
     }
 
-    @Path("workoutplans")
+    @Path("/workoutplans")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getWorkoutPlans(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth) {
         return repository.getWorkoutPlans(getJwt(auth));
+    }
+
+    @Path("/exercises/{workoutId}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getExercises(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
+                                 @PathParam("workoutId") long workoutId) {
+        return repository.getExercises(getJwt(auth), workoutId);
     }
 
     private String getJwt(String auth) {

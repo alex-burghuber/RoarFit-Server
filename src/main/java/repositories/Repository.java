@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import javax.json.Json;
+import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
@@ -17,6 +19,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 
 public class Repository {
 
@@ -84,7 +87,7 @@ public class Repository {
         List<ExerciseTemplate> templates
                 = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
 
-        // create workoutPlan
+        // warmup/cooldown
         Calendar warmup = Calendar.getInstance();
         warmup.clear();
         warmup.set(Calendar.MINUTE, 10);
@@ -95,6 +98,7 @@ public class Repository {
         cooldown.set(Calendar.MINUTE, 17);
         cooldown.set(Calendar.SECOND, 50);
 
+        // create workout plan for user1
         WorkoutPlan workoutPlan1 = new WorkoutPlan("Starting Strength", warmup, cooldown);
 
         // create workouts
@@ -113,6 +117,7 @@ public class Repository {
         workoutPlan1.getWorkouts().add(workout1);
         workoutPlan1.getWorkouts().add(workout2);
 
+        // create workout plan for user2
         WorkoutPlan workoutPlan2 = new WorkoutPlan("Starting Strength", warmup, cooldown);
 
         // create workouts
@@ -170,26 +175,52 @@ public class Repository {
     public Response getWorkoutPlans(String jwt) {
         User user = getUserFromJwt(jwt);
 
-        JSONArray workoutPlansJson = new JSONArray();
+        JSONArray plansJA = new JSONArray();
         for (WorkoutPlan plan : user.getWorkoutPlans()) {
-            JSONObject planJson = new JSONObject()
+            JSONObject planJO = new JSONObject()
                     .put("id", plan.getId())
                     .put("name", plan.getName())
                     .put("warmup", formatter.format(plan.getWarmup().getTime()))
                     .put("cooldown", formatter.format(plan.getCooldown().getTime()));
 
-            JSONArray workoutsJson = new JSONArray();
+            JSONArray workoutsJA = new JSONArray();
             for (Workout workout : plan.getWorkouts()) {
-                JSONObject workoutJson = new JSONObject()
+                JSONObject workoutJO = new JSONObject()
                         .put("id", workout.getId())
                         .put("day", workout.getDay());
-                workoutsJson.put(workoutJson);
+                workoutsJA.put(workoutJO);
             }
-            planJson.put("workouts", workoutsJson);
+            planJO.put("workouts", workoutsJA);
 
-            workoutPlansJson.put(planJson);
+            plansJA.put(planJO);
         }
-        return Response.ok(workoutPlansJson.toString()).build();
+        return Response.ok(plansJA.toString()).build();
+    }
+
+    public Response getExercises(String jwt, long workoutId) {
+        User user = getUserFromJwt(jwt);
+
+        Workout workout = null;
+        for (WorkoutPlan workoutPlan : user.getWorkoutPlans()) {
+            Optional<Workout> optionalWorkout = workoutPlan.getWorkouts()
+                    .stream()
+                    .filter(w -> w.getId() == workoutId)
+                    .findFirst();
+            if (optionalWorkout.isPresent()) {
+                workout = optionalWorkout.get();
+                break;
+            }
+        }
+
+        if (workout != null) {
+            JSONArray exercisesJA = new JSONArray();
+            for (UserExercise userExercise : workout.getUserExercises()) {
+                exercisesJA.put(userExercise.toJson());
+            }
+            return Response.ok(exercisesJA.toString()).build();
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     private User getUserFromJwt(String jwt) {

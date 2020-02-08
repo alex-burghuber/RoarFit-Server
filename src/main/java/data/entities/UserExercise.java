@@ -1,5 +1,7 @@
 package data.entities;
 
+import org.json.JSONObject;
+
 import javax.persistence.*;
 
 @Entity
@@ -26,6 +28,17 @@ public class UserExercise {
         this.template = template;
         this.sets = sets;
         this.reps = reps;
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject()
+                .put("id", id)
+                .put("template", template.toJson())
+                .put("sets", sets)
+                .put("reps", reps)
+                .put("weight", weight)
+                .put("completed", completed)
+                .put("groupId", groupId);
     }
 
     public long getId() {

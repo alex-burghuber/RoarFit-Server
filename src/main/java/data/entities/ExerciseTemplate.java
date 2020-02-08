@@ -1,6 +1,7 @@
 package data.entities;
 
 import data.enums.BodyPart;
+import org.json.JSONObject;
 
 import javax.persistence.*;
 
@@ -23,6 +24,14 @@ public class ExerciseTemplate {
     public ExerciseTemplate(String name, BodyPart bodyPart) {
         this.name = name;
         this.bodyPart = bodyPart;
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject()
+                .put("id", id)
+                .put("name", name)
+                .put("equipment", equipment)
+                .put("bodyPart", bodyPart);
     }
 
     public long getId() {
