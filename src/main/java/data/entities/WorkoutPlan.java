@@ -13,6 +13,7 @@ public class WorkoutPlan {
     private long id;
 
     private String name;
+    private String info;
 
     @Temporal(value = TemporalType.TIME)
     private Date warmup;
@@ -48,6 +49,14 @@ public class WorkoutPlan {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
     }
 
     public Date getWarmup() {

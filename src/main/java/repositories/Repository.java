@@ -1,14 +1,19 @@
 package repositories;
 
 import data.entities.*;
+import data.enums.BodyPart;
 import helper.EntityManagerHelper;
 import helper.JwtHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,6 +31,43 @@ public class Repository {
         em = EntityManagerHelper.getInstance();
         jwtHelper = new JwtHelper();
         formatter = new SimpleDateFormat("mm:ss");
+
+        // load templates
+        URL url = Thread.currentThread()
+                .getContextClassLoader()
+                .getResource("templates/templates.json");
+
+        if (url != null) {
+            try (InputStream inputStream = url.openStream()) {
+                JSONArray jsonArray = new JSONArray(new JSONTokener(inputStream));
+                System.out.println(jsonArray.toString());
+                for (int i = 0; i < jsonArray.length(); ++i) {
+                    JSONObject json = jsonArray.getJSONObject(i);
+
+                    ExerciseTemplate template = new ExerciseTemplate(
+                            json.getString("name"),
+                            json.getEnum(BodyPart.class, "bodyPart")
+                    );
+
+                    if (!json.isNull("equipment")) {
+                        template.setEquipment(json.getString("equipment"));
+                    }
+
+                    /*if (!json.isNull("desc")) {
+                        template.setDesc(json.getString("desc"));
+                    }*/
+
+                    em.getTransaction().begin();
+                    em.persist(template);
+                    em.getTransaction().commit();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            throw new RuntimeException("Exercise templates file not found");
+        }
+
 
         createPlaceholders();
     }
@@ -87,9 +129,9 @@ public class Repository {
                         .put("day", workout.getDay());
 
                 JSONArray exercisesJA = new JSONArray();
-                for (Exercise exercise : workout.getExercises()) {
+                /*for (Exercise exercise : workout.getExercises()) {
                     exercisesJA.put(exercise.toJson());
-                }
+                }*/
 
                 workoutJO.put("exercises", exercisesJA);
                 workoutsJA.put(workoutJO);
@@ -112,16 +154,14 @@ public class Repository {
     private void createPlaceholders() {
         // create user
         User user1 = new User(8387, "Alex123", "123ALEXtest", "Alex", "Burg");
-        User user2 = new User(8383, "danielpfeffer", "pfefferIsyes", "Mr", "Pepper");
         em.getTransaction().begin();
         em.persist(user1);
-        em.persist(user2);
         em.getTransaction().commit();
 
         List<ExerciseTemplate> templates
                 = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
 
-        /* create workout plan for user1 */
+        /* create workout plan (starting strength) for user1 */
 
         // warmup/cooldown
         Date warmup1, cooldown1;
@@ -132,46 +172,20 @@ public class Repository {
             throw new RuntimeException(e);
         }
 
-        WorkoutPlan startingStrength = new WorkoutPlan("Starting Strength", warmup1, cooldown1);
+        WorkoutPlan workoutPlan1 = new WorkoutPlan("Starting Strength", warmup1, cooldown1);
 
         // create workouts
         Workout workout1 = new Workout(1);
-        Exercise exercise1 = new Exercise(templates.get(1), 3, 5, 45);
-        Exercise exercise2 = new Exercise(templates.get(2), 3, 6, 32.5);
-        workout1.getExercises().add(exercise1);
-        workout1.getExercises().add(exercise2);
 
-        Workout workout2 = new Workout(2);
-        Exercise exercise3 = new Exercise(templates.get(4), 5, 10);
-        Exercise exercise4 = new Exercise(templates.get(5), 2, 4);
-        workout2.getExercises().add(exercise3);
-        workout2.getExercises().add(exercise4);
+        ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", BodyPart.LEGS);
+        Exercise exercise1 = new Exercise(template1);
+        ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, "3", "5", "45");
 
-        startingStrength.getWorkouts().add(workout1);
-        startingStrength.getWorkouts().add(workout2);
-
-        // create workout plan for user2
-        WorkoutPlan workoutPlan2 = new WorkoutPlan("Starting Strength", warmup, cooldown);
-
-        // create workouts
-        Workout workout3 = new Workout(1);
-        Exercise exercise5 = new Exercise(templates.get(1), 3, 5);
-        Exercise exercise6 = new Exercise(templates.get(2), 3, 6);
-        workout1.getExercises().add(exercise5);
-        workout1.getExercises().add(exercise6);
-
-        Workout workout4 = new Workout(2);
-        Exercise exercise7 = new Exercise(templates.get(4), 5, 10);
-        Exercise exercise8 = new Exercise(templates.get(5), 2, 4);
-        workout2.getExercises().add(exercise7);
-        workout2.getExercises().add(exercise8);
-
-        workoutPlan2.getWorkouts().add(workout3);
-        workoutPlan2.getWorkouts().add(workout4);
+        workout1.getExercises().add(specification1);
+        workoutPlan1.getWorkouts().add(workout1);
 
         em.getTransaction().begin();
-        user1.getWorkoutPlans().add(startingStrength);
-        user2.getWorkoutPlans().add(workoutPlan2);
+        em.persist(workoutPlan1);
         em.getTransaction().commit();
     }
 }

@@ -14,8 +14,10 @@ public class Workout {
     private int day;
     private int week;
 
+    private String info;
+
     @OneToMany(cascade = CascadeType.PERSIST)
-    private List<Exercise> exercises;
+    private List<ExerciseSpecification> exercises;
 
     public Workout() {
         exercises = new ArrayList<>();
@@ -56,11 +58,19 @@ public class Workout {
         this.week = week;
     }
 
-    public List<Exercise> getExercises() {
+    public String getInfo() {
+        return info;
+    }
+
+    public void setInfo(String info) {
+        this.info = info;
+    }
+
+    public List<ExerciseSpecification> getExercises() {
         return exercises;
     }
 
-    public void setExercises(List<Exercise> exercises) {
+    public void setExercises(List<ExerciseSpecification> exercises) {
         this.exercises = exercises;
     }
 }

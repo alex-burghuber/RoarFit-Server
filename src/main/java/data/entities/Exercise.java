@@ -1,9 +1,7 @@
 package data.entities;
 
-import data.enums.BodyPart;
-import org.json.JSONObject;
-
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 public class Exercise {
@@ -12,33 +10,29 @@ public class Exercise {
     @GeneratedValue
     private long id;
 
-    private String name;
-    private String equipment;
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private ExerciseTemplate template;
 
-    @Enumerated(EnumType.STRING)
-    private BodyPart bodyPart;
+    @Temporal(TemporalType.TIME)
+    private Date time;
 
     private int sets;
-    private String reps;
+    private int reps;
     private String weight;
-
-    private boolean completed = false;
-    private int groupId = 0;
 
     public Exercise() {
     }
 
-    public JSONObject toJson() {
-        return new JSONObject()
-                .put("id", id)
-                .put("name", name)
-                .put("equipment", equipment)
-                .put("bodyPart", bodyPart)
-                .put("sets", sets)
-                .put("reps", reps)
-                .put("weight", weight)
-                .put("completed", completed)
-                .put("groupId", groupId);
+    public Exercise(ExerciseTemplate template) {
+        this.template = template;
+    }
+
+    public Exercise(ExerciseTemplate template, Date time, int sets, int reps, String weight) {
+        this.template = template;
+        this.time = time;
+        this.sets = sets;
+        this.reps = reps;
+        this.weight = weight;
     }
 
     public long getId() {
@@ -49,6 +43,22 @@ public class Exercise {
         this.id = id;
     }
 
+    public ExerciseTemplate getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(ExerciseTemplate template) {
+        this.template = template;
+    }
+
+    public Date getTime() {
+        return time;
+    }
+
+    public void setTime(Date time) {
+        this.time = time;
+    }
+
     public int getSets() {
         return sets;
     }
@@ -57,11 +67,11 @@ public class Exercise {
         this.sets = sets;
     }
 
-    public String getReps() {
+    public int getReps() {
         return reps;
     }
 
-    public void setReps(String reps) {
+    public void setReps(int reps) {
         this.reps = reps;
     }
 
@@ -71,21 +81,5 @@ public class Exercise {
 
     public void setWeight(String weight) {
         this.weight = weight;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
-    }
-
-    public int getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(int groupId) {
-        this.groupId = groupId;
     }
 }

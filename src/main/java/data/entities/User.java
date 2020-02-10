@@ -1,6 +1,9 @@
 package data.entities;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +22,12 @@ public class User {
     @OneToMany(cascade = CascadeType.PERSIST)
     private List<WorkoutPlan> workoutPlans;
 
+    @OneToMany(cascade = CascadeType.PERSIST)
+    private List<Exercise> personalExercises;
+
     public User() {
         workoutPlans = new ArrayList<>();
+        personalExercises = new ArrayList<>();
     }
 
     public User(int id, String username, String password, String firstName, String lastName) {
@@ -78,5 +85,13 @@ public class User {
 
     public void setWorkoutPlans(List<WorkoutPlan> workoutPlans) {
         this.workoutPlans = workoutPlans;
+    }
+
+    public List<Exercise> getPersonalExercises() {
+        return personalExercises;
+    }
+
+    public void setPersonalExercises(List<Exercise> personalExercises) {
+        this.personalExercises = personalExercises;
     }
 }
