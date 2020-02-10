@@ -2,7 +2,7 @@ package data.entities;
 
 import javax.persistence.*;
 import java.util.ArrayList;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -15,10 +15,10 @@ public class WorkoutPlan {
     private String name;
 
     @Temporal(value = TemporalType.TIME)
-    private Calendar warmup;
+    private Date warmup;
 
     @Temporal(value = TemporalType.TIME)
-    private Calendar cooldown;
+    private Date cooldown;
 
     @OneToMany(cascade = CascadeType.PERSIST)
     private List<Workout> workouts;
@@ -27,7 +27,7 @@ public class WorkoutPlan {
         workouts = new ArrayList<>();
     }
 
-    public WorkoutPlan(String name, Calendar warmup, Calendar cooldown) {
+    public WorkoutPlan(String name, Date warmup, Date cooldown) {
         this();
         this.name = name;
         this.warmup = warmup;
@@ -50,19 +50,19 @@ public class WorkoutPlan {
         this.name = name;
     }
 
-    public Calendar getWarmup() {
+    public Date getWarmup() {
         return warmup;
     }
 
-    public void setWarmup(Calendar warmup) {
+    public void setWarmup(Date warmup) {
         this.warmup = warmup;
     }
 
-    public Calendar getCooldown() {
+    public Date getCooldown() {
         return cooldown;
     }
 
-    public void setCooldown(Calendar cooldown) {
+    public void setCooldown(Date cooldown) {
         this.cooldown = cooldown;
     }
 

@@ -12,17 +12,24 @@ public class Workout {
     private long id;
 
     private int day;
+    private int week;
 
     @OneToMany(cascade = CascadeType.PERSIST)
-    private List<UserExercise> userExercises;
+    private List<Exercise> exercises;
 
     public Workout() {
-        userExercises = new ArrayList<>();
+        exercises = new ArrayList<>();
     }
 
     public Workout(int day) {
         this();
         this.day = day;
+    }
+
+    public Workout(int day, int week) {
+        this();
+        this.day = day;
+        this.week = week;
     }
 
     public long getId() {
@@ -41,11 +48,19 @@ public class Workout {
         this.day = day;
     }
 
-    public List<UserExercise> getUserExercises() {
-        return userExercises;
+    public int getWeek() {
+        return week;
     }
 
-    public void setUserExercises(List<UserExercise> userExercises) {
-        this.userExercises = userExercises;
+    public void setWeek(int week) {
+        this.week = week;
+    }
+
+    public List<Exercise> getExercises() {
+        return exercises;
+    }
+
+    public void setExercises(List<Exercise> exercises) {
+        this.exercises = exercises;
     }
 }

@@ -1,25 +1,18 @@
 package repositories;
 
 import data.entities.*;
-import data.enums.BodyPart;
 import helper.EntityManagerHelper;
 import helper.JwtHelper;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
 
-import javax.json.Json;
-import javax.json.JsonObject;
 import javax.persistence.EntityManager;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 public class Repository {
 
@@ -34,37 +27,6 @@ public class Repository {
         jwtHelper = new JwtHelper();
         formatter = new SimpleDateFormat("mm:ss");
 
-        // load templates
-        URL url = Thread.currentThread()
-                .getContextClassLoader()
-                .getResource("templates/exercises.json");
-
-        if (url != null) {
-            try (InputStream inputStream = url.openStream()) {
-                JSONArray jsonArray = new JSONArray(new JSONTokener(inputStream));
-
-                em.getTransaction().begin();
-                for (int i = 0; i < jsonArray.length(); ++i) {
-                    JSONObject json = jsonArray.getJSONObject(i);
-
-                    ExerciseTemplate template = new ExerciseTemplate(
-                            json.getString("name"),
-                            json.getEnum(BodyPart.class, "bodyPart")
-                    );
-                    if (!json.isNull("equipment")) {
-                        template.setEquipment(json.getString("equipment"));
-                    }
-
-                    em.persist(template);
-                }
-                em.getTransaction().commit();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            throw new RuntimeException("Exercise templates file not found");
-        }
-
         createPlaceholders();
     }
 
@@ -73,73 +35,6 @@ public class Repository {
             repository = new Repository();
         }
         return repository;
-    }
-
-    private void createPlaceholders() {
-        // create user
-        User user1 = new User(8387, "Alex123", "123ALEXtest", "Alex", "Burg");
-        User user2 = new User(8383, "danielpfeffer", "pfefferIsyes", "Mr", "Pepper");
-        em.getTransaction().begin();
-        em.persist(user1);
-        em.persist(user2);
-        em.getTransaction().commit();
-
-        List<ExerciseTemplate> templates
-                = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
-
-        // warmup/cooldown
-        Calendar warmup = Calendar.getInstance();
-        warmup.clear();
-        warmup.set(Calendar.MINUTE, 10);
-        warmup.set(Calendar.SECOND, 0);
-
-        Calendar cooldown = Calendar.getInstance();
-        cooldown.clear();
-        cooldown.set(Calendar.MINUTE, 17);
-        cooldown.set(Calendar.SECOND, 50);
-
-        // create workout plan for user1
-        WorkoutPlan workoutPlan1 = new WorkoutPlan("Starting Strength", warmup, cooldown);
-
-        // create workouts
-        Workout workout1 = new Workout(1);
-        UserExercise userExercise1 = new UserExercise(templates.get(1), 3, 5);
-        UserExercise userExercise2 = new UserExercise(templates.get(2), 3, 6);
-        workout1.getUserExercises().add(userExercise1);
-        workout1.getUserExercises().add(userExercise2);
-
-        Workout workout2 = new Workout(2);
-        UserExercise userExercise3 = new UserExercise(templates.get(4), 5, 10);
-        UserExercise userExercise4 = new UserExercise(templates.get(5), 2, 4);
-        workout2.getUserExercises().add(userExercise3);
-        workout2.getUserExercises().add(userExercise4);
-
-        workoutPlan1.getWorkouts().add(workout1);
-        workoutPlan1.getWorkouts().add(workout2);
-
-        // create workout plan for user2
-        WorkoutPlan workoutPlan2 = new WorkoutPlan("Starting Strength", warmup, cooldown);
-
-        // create workouts
-        Workout workout3 = new Workout(1);
-        UserExercise userExercise5 = new UserExercise(templates.get(1), 3, 5);
-        UserExercise userExercise6 = new UserExercise(templates.get(2), 3, 6);
-        workout1.getUserExercises().add(userExercise5);
-        workout1.getUserExercises().add(userExercise6);
-
-        Workout workout4 = new Workout(2);
-        UserExercise userExercise7 = new UserExercise(templates.get(4), 5, 10);
-        UserExercise userExercise8 = new UserExercise(templates.get(5), 2, 4);
-        workout2.getUserExercises().add(userExercise7);
-        workout2.getUserExercises().add(userExercise8);
-
-        workoutPlan2.getWorkouts().add(workout3);
-        workoutPlan2.getWorkouts().add(workout4);
-
-        em.getTransaction().begin();
-        user1.getWorkoutPlans().add(workoutPlan1);
-        user2.getWorkoutPlans().add(workoutPlan2);
-        em.getTransaction().commit();
     }
 
     public Response login(String username, String password) {
@@ -175,6 +70,8 @@ public class Repository {
     public Response getWorkoutPlans(String jwt) {
         User user = getUserFromJwt(jwt);
 
+        // todo capitalize using WordUtils.capitalizeFully()
+
         JSONArray plansJA = new JSONArray();
         for (WorkoutPlan plan : user.getWorkoutPlans()) {
             JSONObject planJO = new JSONObject()
@@ -188,39 +85,19 @@ public class Repository {
                 JSONObject workoutJO = new JSONObject()
                         .put("id", workout.getId())
                         .put("day", workout.getDay());
+
+                JSONArray exercisesJA = new JSONArray();
+                for (Exercise exercise : workout.getExercises()) {
+                    exercisesJA.put(exercise.toJson());
+                }
+
+                workoutJO.put("exercises", exercisesJA);
                 workoutsJA.put(workoutJO);
             }
             planJO.put("workouts", workoutsJA);
-
             plansJA.put(planJO);
         }
         return Response.ok(plansJA.toString()).build();
-    }
-
-    public Response getExercises(String jwt, long workoutId) {
-        User user = getUserFromJwt(jwt);
-
-        Workout workout = null;
-        for (WorkoutPlan workoutPlan : user.getWorkoutPlans()) {
-            Optional<Workout> optionalWorkout = workoutPlan.getWorkouts()
-                    .stream()
-                    .filter(w -> w.getId() == workoutId)
-                    .findFirst();
-            if (optionalWorkout.isPresent()) {
-                workout = optionalWorkout.get();
-                break;
-            }
-        }
-
-        if (workout != null) {
-            JSONArray exercisesJA = new JSONArray();
-            for (UserExercise userExercise : workout.getUserExercises()) {
-                exercisesJA.put(userExercise.toJson());
-            }
-            return Response.ok(exercisesJA.toString()).build();
-        }
-
-        return Response.status(Response.Status.NOT_FOUND).build();
     }
 
     private User getUserFromJwt(String jwt) {
@@ -230,5 +107,71 @@ public class Repository {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
         return user;
+    }
+
+    private void createPlaceholders() {
+        // create user
+        User user1 = new User(8387, "Alex123", "123ALEXtest", "Alex", "Burg");
+        User user2 = new User(8383, "danielpfeffer", "pfefferIsyes", "Mr", "Pepper");
+        em.getTransaction().begin();
+        em.persist(user1);
+        em.persist(user2);
+        em.getTransaction().commit();
+
+        List<ExerciseTemplate> templates
+                = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
+
+        /* create workout plan for user1 */
+
+        // warmup/cooldown
+        Date warmup1, cooldown1;
+        try {
+            warmup1 = formatter.parse("10:00");
+            cooldown1 = formatter.parse("20:00");
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+
+        WorkoutPlan startingStrength = new WorkoutPlan("Starting Strength", warmup1, cooldown1);
+
+        // create workouts
+        Workout workout1 = new Workout(1);
+        Exercise exercise1 = new Exercise(templates.get(1), 3, 5, 45);
+        Exercise exercise2 = new Exercise(templates.get(2), 3, 6, 32.5);
+        workout1.getExercises().add(exercise1);
+        workout1.getExercises().add(exercise2);
+
+        Workout workout2 = new Workout(2);
+        Exercise exercise3 = new Exercise(templates.get(4), 5, 10);
+        Exercise exercise4 = new Exercise(templates.get(5), 2, 4);
+        workout2.getExercises().add(exercise3);
+        workout2.getExercises().add(exercise4);
+
+        startingStrength.getWorkouts().add(workout1);
+        startingStrength.getWorkouts().add(workout2);
+
+        // create workout plan for user2
+        WorkoutPlan workoutPlan2 = new WorkoutPlan("Starting Strength", warmup, cooldown);
+
+        // create workouts
+        Workout workout3 = new Workout(1);
+        Exercise exercise5 = new Exercise(templates.get(1), 3, 5);
+        Exercise exercise6 = new Exercise(templates.get(2), 3, 6);
+        workout1.getExercises().add(exercise5);
+        workout1.getExercises().add(exercise6);
+
+        Workout workout4 = new Workout(2);
+        Exercise exercise7 = new Exercise(templates.get(4), 5, 10);
+        Exercise exercise8 = new Exercise(templates.get(5), 2, 4);
+        workout2.getExercises().add(exercise7);
+        workout2.getExercises().add(exercise8);
+
+        workoutPlan2.getWorkouts().add(workout3);
+        workoutPlan2.getWorkouts().add(workout4);
+
+        em.getTransaction().begin();
+        user1.getWorkoutPlans().add(startingStrength);
+        user2.getWorkoutPlans().add(workoutPlan2);
+        em.getTransaction().commit();
     }
 }

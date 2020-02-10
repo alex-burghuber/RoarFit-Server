@@ -1,39 +1,39 @@
 package data.entities;
 
+import data.enums.BodyPart;
 import org.json.JSONObject;
 
 import javax.persistence.*;
 
 @Entity
-public class UserExercise {
+public class Exercise {
 
     @Id
     @GeneratedValue
     private long id;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    private ExerciseTemplate template;
+    private String name;
+    private String equipment;
+
+    @Enumerated(EnumType.STRING)
+    private BodyPart bodyPart;
 
     private int sets;
-    private int reps;
+    private String reps;
+    private String weight;
 
-    private int weight = 0;
     private boolean completed = false;
     private int groupId = 0;
 
-    public UserExercise() {
-    }
-
-    public UserExercise(ExerciseTemplate template, int sets, int reps) {
-        this.template = template;
-        this.sets = sets;
-        this.reps = reps;
+    public Exercise() {
     }
 
     public JSONObject toJson() {
         return new JSONObject()
                 .put("id", id)
-                .put("template", template.toJson())
+                .put("name", name)
+                .put("equipment", equipment)
+                .put("bodyPart", bodyPart)
                 .put("sets", sets)
                 .put("reps", reps)
                 .put("weight", weight)
@@ -49,14 +49,6 @@ public class UserExercise {
         this.id = id;
     }
 
-    public ExerciseTemplate getTemplate() {
-        return template;
-    }
-
-    public void setTemplate(ExerciseTemplate template) {
-        this.template = template;
-    }
-
     public int getSets() {
         return sets;
     }
@@ -65,19 +57,19 @@ public class UserExercise {
         this.sets = sets;
     }
 
-    public int getReps() {
+    public String getReps() {
         return reps;
     }
 
-    public void setReps(int reps) {
+    public void setReps(String reps) {
         this.reps = reps;
     }
 
-    public int getWeight() {
+    public String getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(String weight) {
         this.weight = weight;
     }
 
