@@ -1,8 +1,12 @@
 package data.entities;
 
 import data.enums.BodyPart;
+import org.json.JSONObject;
 
 import javax.persistence.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class ExerciseTemplate {
@@ -14,17 +18,34 @@ public class ExerciseTemplate {
     private String name;
     private String equipment;
 
-    @Enumerated(value = EnumType.STRING)
-    private BodyPart bodyPart;
+    @ElementCollection
+    @Enumerated(EnumType.STRING)
+    private Set<BodyPart> bodyParts;
 
-    private String desc;
+    private String description;
 
     public ExerciseTemplate() {
+        bodyParts = new HashSet<>();
     }
 
-    public ExerciseTemplate(String name, BodyPart bodyPart) {
+    public ExerciseTemplate(String name) {
+        this();
         this.name = name;
-        this.bodyPart = bodyPart;
+    }
+
+    public ExerciseTemplate(String name, BodyPart... bodyPart) {
+        this();
+        this.name = name;
+        this.bodyParts.addAll(Arrays.asList(bodyPart));
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject()
+                .put("id", id)
+                .put("name", name)
+                .put("equipment", equipment)
+                .put("bodyParts", bodyParts)
+                .put("description", description);
     }
 
     public long getId() {
@@ -51,19 +72,19 @@ public class ExerciseTemplate {
         this.equipment = equipment;
     }
 
-    public BodyPart getBodyPart() {
-        return bodyPart;
+    public Set<BodyPart> getBodyParts() {
+        return bodyParts;
     }
 
-    public void setBodyPart(BodyPart bodyPart) {
-        this.bodyPart = bodyPart;
+    public void setBodyParts(Set<BodyPart> bodyParts) {
+        this.bodyParts = bodyParts;
     }
 
-    public String getDesc() {
-        return desc;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setDescription(String desc) {
+        this.description = desc;
     }
 }

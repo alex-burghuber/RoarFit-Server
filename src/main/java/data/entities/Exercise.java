@@ -1,6 +1,10 @@
 package data.entities;
 
+import helper.TimeFormatHelper;
+import org.json.JSONObject;
+
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -33,6 +37,20 @@ public class Exercise {
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject()
+                .put("id", id)
+                .put("template", template.toJson())
+                .put("sets", sets)
+                .put("reps", reps)
+                .put("weight", weight);
+        if (time != null) {
+            SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
+            json.put("time", formatter.format(time));
+        }
+        return json;
     }
 
     public long getId() {

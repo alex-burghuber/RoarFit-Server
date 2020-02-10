@@ -4,5 +4,7 @@ public enum BodyPart {
     LEGS,
     BACK,
     CHEST,
-    UPPER_BACK
+    UPPER_BACK,
+    BELLY,
+    SHOULDER
 }

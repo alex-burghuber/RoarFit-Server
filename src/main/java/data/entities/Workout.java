@@ -1,5 +1,7 @@
 package data.entities;
 
+import org.json.JSONObject;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,15 +14,15 @@ public class Workout {
     private long id;
 
     private int day;
-    private int week;
+    private int week = 0;
 
     private String info;
 
     @OneToMany(cascade = CascadeType.PERSIST)
-    private List<ExerciseSpecification> exercises;
+    private List<ExerciseSpecification> specifications;
 
     public Workout() {
-        exercises = new ArrayList<>();
+        specifications = new ArrayList<>();
     }
 
     public Workout(int day) {
@@ -32,6 +34,14 @@ public class Workout {
         this();
         this.day = day;
         this.week = week;
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject()
+                .put("id", id)
+                .put("day", day)
+                .put("week", week)
+                .put("info", info);
     }
 
     public long getId() {
@@ -66,11 +76,11 @@ public class Workout {
         this.info = info;
     }
 
-    public List<ExerciseSpecification> getExercises() {
-        return exercises;
+    public List<ExerciseSpecification> getSpecifications() {
+        return specifications;
     }
 
-    public void setExercises(List<ExerciseSpecification> exercises) {
-        this.exercises = exercises;
+    public void setSpecifications(List<ExerciseSpecification> exercises) {
+        this.specifications = exercises;
     }
 }

@@ -1,5 +1,7 @@
 package data.entities;
 
+import org.json.JSONObject;
+
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -37,6 +39,13 @@ public class User {
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject()
+                .put("username", username)
+                .put("firstName", firstName)
+                .put("lastName", lastName);
     }
 
     public long getId() {

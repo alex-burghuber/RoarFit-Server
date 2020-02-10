@@ -1,6 +1,10 @@
 package data.entities;
 
+import helper.TimeFormatHelper;
+import org.json.JSONObject;
+
 import javax.persistence.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -24,6 +28,8 @@ public class WorkoutPlan {
     @OneToMany(cascade = CascadeType.PERSIST)
     private List<Workout> workouts;
 
+    private boolean archived = false;
+
     public WorkoutPlan() {
         workouts = new ArrayList<>();
     }
@@ -33,6 +39,17 @@ public class WorkoutPlan {
         this.name = name;
         this.warmup = warmup;
         this.cooldown = cooldown;
+    }
+
+    public JSONObject toJson() {
+        SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
+        return new JSONObject()
+                .put("id", id)
+                .put("name", name)
+                .put("info", id)
+                .put("warmup", formatter.format(warmup))
+                .put("cooldown", formatter.format(cooldown))
+                .put("archived", archived);
     }
 
     public long getId() {
@@ -81,5 +98,13 @@ public class WorkoutPlan {
 
     public void setWorkouts(List<Workout> workouts) {
         this.workouts = workouts;
+    }
+
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public void setArchived(boolean archived) {
+        this.archived = archived;
     }
 }

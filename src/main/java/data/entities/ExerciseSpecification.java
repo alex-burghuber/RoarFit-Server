@@ -1,5 +1,7 @@
 package data.entities;
 
+import org.json.JSONObject;
+
 import javax.persistence.*;
 
 @Entity
@@ -9,14 +11,12 @@ public class ExerciseSpecification {
     @GeneratedValue
     private long id;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = CascadeType.PERSIST)
     private Exercise exercise;
 
     private String sets;
     private String reps;
     private String weight;
-
-    private int group = 0;
 
     private String info;
 
@@ -36,6 +36,16 @@ public class ExerciseSpecification {
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
+    }
+
+    public JSONObject toJson() {
+        return new JSONObject()
+                .put("id", id)
+                .put("exercise", exercise.toJson())
+                .put("sets", sets)
+                .put("reps", reps)
+                .put("weight", weight)
+                .put("info", info);
     }
 
     public long getId() {
@@ -76,14 +86,6 @@ public class ExerciseSpecification {
 
     public void setWeight(String weight) {
         this.weight = weight;
-    }
-
-    public int getGroup() {
-        return group;
-    }
-
-    public void setGroup(int group) {
-        this.group = group;
     }
 
     public String getInfo() {

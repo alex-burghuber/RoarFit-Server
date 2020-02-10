@@ -28,8 +28,8 @@ public class Main {
                 properties.put("javax.persistence.schema-generation.database.action", "drop-and-create");
                 EntityManagerHelper.setProperties(properties);
 
-                // load exercise templates by instancing the repository
-                Repository.getInstance();
+                // fill the database with templates and placeholders
+                Repository.getInstance().fillDatabase();
             }
         }
 
