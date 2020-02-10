@@ -88,6 +88,17 @@ public class Repository {
         return Response.ok(plansJA.toString()).build();
     }
 
+    public Response getEquipment(String jwt) {
+        // for jwt validation
+        getUserFromJwt(jwt);
+
+        List<String> equipment
+                = em.createQuery("SELECT DISTINCT t.equipment FROM ExerciseTemplate t where t.equipment != null ", String.class)
+                .getResultList();
+
+        return Response.ok(new JSONArray(equipment).toString()).build();
+    }
+
     private User getUserFromJwt(String jwt) {
         long id = jwtHelper.getUserId(jwt);
         User user = em.find(User.class, id);
@@ -135,15 +146,25 @@ public class Repository {
 
         // create user
         User user1 = new User(8387, "Alex123", "123ALEXtest", "Alex", "Burg");
+        User user2 = new User(8383, "Pfeff", "PfeffPwd", "Mr", "Pepper");
         em.getTransaction().begin();
         em.persist(user1);
+        em.persist(user2);
         em.getTransaction().commit();
 
         List<ExerciseTemplate> templates
                 = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
 
-        /* create workout plan (starting strength) for user1 */
+        WorkoutPlan workoutPlan1 = createWorkoutPlan();
+        WorkoutPlan workoutPlan2 = createWorkoutPlan();
 
+        em.getTransaction().begin();
+        user1.getWorkoutPlans().add(workoutPlan1);
+        user2.getWorkoutPlans().add(workoutPlan2);
+        em.getTransaction().commit();
+    }
+
+    private WorkoutPlan createWorkoutPlan() {
         // warmup/cooldown
         Date warmup1, cooldown1;
         try {
@@ -187,8 +208,6 @@ public class Repository {
         workout2.getSpecifications().addAll(Arrays.asList(specification4, specification5));
         workoutPlan1.getWorkouts().add(workout2);
 
-        em.getTransaction().begin();
-        user1.getWorkoutPlans().add(workoutPlan1);
-        em.getTransaction().commit();
+        return workoutPlan1;
     }
 }

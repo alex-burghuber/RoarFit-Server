@@ -46,7 +46,7 @@ public class WorkoutPlan {
         return new JSONObject()
                 .put("id", id)
                 .put("name", name)
-                .put("info", id)
+                .put("info", info)
                 .put("warmup", formatter.format(warmup))
                 .put("cooldown", formatter.format(cooldown))
                 .put("archived", archived);

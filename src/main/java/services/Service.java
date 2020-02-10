@@ -43,7 +43,17 @@ public class Service {
         return repository.getWorkoutPlans(getJwt(auth));
     }
 
+    @Path("/equipment")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getEquipment(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth) {
+        return repository.getEquipment(getJwt(auth));
+    }
+
     private String getJwt(String auth) {
-        return auth.split("\\s")[1];
+        if (auth != null) {
+            return auth.split("\\s")[1];
+        }
+        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
     }
 }
