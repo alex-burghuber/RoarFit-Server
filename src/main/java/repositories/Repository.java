@@ -92,11 +92,23 @@ public class Repository {
         // for jwt validation
         getUserFromJwt(jwt);
 
-        List<String> equipment
-                = em.createQuery("SELECT DISTINCT t.equipment FROM ExerciseTemplate t where t.equipment != null ", String.class)
+        String query = "SELECT DISTINCT t.equipment FROM ExerciseTemplate t where t.equipment != null";
+        List<String> equipment = em.createQuery(query, String.class)
                 .getResultList();
 
-        return Response.ok(new JSONArray(equipment).toString()).build();
+        return Response.ok(equipment).build();
+    }
+
+    public Response getExerciseTemplates(String jwt, String equipment) {
+        // for jwt validation
+        getUserFromJwt(jwt);
+
+        String query = "SELECT t FROM ExerciseTemplate t where LOWER(t.equipment) = LOWER(:equipment)";
+        List<ExerciseTemplate> templates = em.createQuery(query, ExerciseTemplate.class)
+                .setParameter("equipment", equipment)
+                .getResultList();
+
+        return Response.ok(templates).build();
     }
 
     private User getUserFromJwt(String jwt) {

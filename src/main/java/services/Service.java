@@ -1,6 +1,7 @@
 package services;
 
 import data.dto.LoginDTO;
+import data.dto.TemplateDTO;
 import repositories.Repository;
 
 import javax.ws.rs.*;
@@ -48,6 +49,14 @@ public class Service {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getEquipment(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth) {
         return repository.getEquipment(getJwt(auth));
+    }
+
+    @Path("/templates")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getExerciseTemplates(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, TemplateDTO template) {
+        return repository.getExerciseTemplates(getJwt(auth), template.getEquipment());
     }
 
     private String getJwt(String auth) {
