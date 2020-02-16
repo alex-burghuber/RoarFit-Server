@@ -48,7 +48,7 @@ public class ExerciseTemplate {
                 .put("description", description);
         JSONArray bodyPartsJA = new JSONArray();
         for (BodyPart bodyPart : bodyParts) {
-            bodyPartsJA.put(bodyPart.toString());
+            bodyPartsJA.put(bodyPart.getGerman());
         }
         json.put("bodyParts", bodyPartsJA);
         return json;

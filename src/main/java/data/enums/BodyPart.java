@@ -1,18 +1,24 @@
 package data.enums;
 
-import org.apache.commons.text.WordUtils;
-
 public enum BodyPart {
-    LEGS,
-    BACK,
-    CHEST,
-    UPPER_BACK,
-    BELLY,
-    SHOULDER;
+    LEGS("Beine"),
+    BACK("Rücken"),
+    CHEST("Brust"),
+    UPPER_BACK("Oberer Rücken"),
+    BELLY("Bauch"),
+    SHOULDER("Schulter");
 
-    @Override
-    public String toString() {
-        String str = super.toString().replace('_', ' ');
-        return WordUtils.capitalizeFully(str, ' ');
+    private String german;
+
+    BodyPart(String german) {
+        this.german = german;
+    }
+
+    public String getGerman() {
+        return german;
+    }
+
+    public void setGerman(String german) {
+        this.german = german;
     }
 }
