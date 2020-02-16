@@ -1,6 +1,7 @@
 package data.entities;
 
 import data.enums.BodyPart;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.persistence.*;
@@ -33,19 +34,24 @@ public class ExerciseTemplate {
         this.name = name;
     }
 
-    public ExerciseTemplate(String name, BodyPart... bodyPart) {
+    public ExerciseTemplate(String name, BodyPart... bodyParts) {
         this();
         this.name = name;
-        this.bodyParts.addAll(Arrays.asList(bodyPart));
+        this.bodyParts.addAll(Arrays.asList(bodyParts));
     }
 
     public JSONObject toJson() {
-        return new JSONObject()
+        JSONObject json = new JSONObject()
                 .put("id", id)
                 .put("name", name)
                 .put("equipment", equipment)
-                .put("bodyParts", bodyParts)
                 .put("description", description);
+        JSONArray bodyPartsJA = new JSONArray();
+        for (BodyPart bodyPart : bodyParts) {
+            bodyPartsJA.put(bodyPart.toString());
+        }
+        json.put("bodyParts", bodyPartsJA);
+        return json;
     }
 
     public long getId() {
