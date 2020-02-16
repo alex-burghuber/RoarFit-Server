@@ -108,7 +108,11 @@ public class Repository {
                 .setParameter("equipment", equipment)
                 .getResultList();
 
-        return Response.ok(templates).build();
+        JSONArray templatesJA = new JSONArray();
+        for (ExerciseTemplate template : templates) {
+            templatesJA.put(template.toJson());
+        }
+        return Response.ok(templatesJA.toString()).build();
     }
 
     private User getUserFromJwt(String jwt) {
