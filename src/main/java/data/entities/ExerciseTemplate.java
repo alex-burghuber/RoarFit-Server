@@ -1,13 +1,14 @@
 package data.entities;
 
-import data.enums.BodyPart;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
-import javax.persistence.*;
+import javax.persistence.ElementCollection;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @Entity
 public class ExerciseTemplate {
@@ -20,13 +21,12 @@ public class ExerciseTemplate {
     private String equipment;
 
     @ElementCollection
-    @Enumerated(EnumType.STRING)
-    private Set<BodyPart> bodyParts;
+    private List<String> bodyParts;
 
     private String description;
 
     public ExerciseTemplate() {
-        bodyParts = new HashSet<>();
+        bodyParts = new ArrayList<>();
     }
 
     public ExerciseTemplate(String name) {
@@ -34,24 +34,19 @@ public class ExerciseTemplate {
         this.name = name;
     }
 
-    public ExerciseTemplate(String name, BodyPart... bodyParts) {
+    public ExerciseTemplate(String name, String... bodyParts) {
         this();
         this.name = name;
         this.bodyParts.addAll(Arrays.asList(bodyParts));
     }
 
     public JSONObject toJson() {
-        JSONObject json = new JSONObject()
+        return new JSONObject()
                 .put("id", id)
                 .put("name", name)
                 .put("equipment", equipment)
-                .put("description", description);
-        JSONArray bodyPartsJA = new JSONArray();
-        for (BodyPart bodyPart : bodyParts) {
-            bodyPartsJA.put(bodyPart.getGerman());
-        }
-        json.put("bodyParts", bodyPartsJA);
-        return json;
+                .put("description", description)
+                .put("bodyParts", bodyParts);
     }
 
     public long getId() {
@@ -78,11 +73,11 @@ public class ExerciseTemplate {
         this.equipment = equipment;
     }
 
-    public Set<BodyPart> getBodyParts() {
+    public List<String> getBodyParts() {
         return bodyParts;
     }
 
-    public void setBodyParts(Set<BodyPart> bodyParts) {
+    public void setBodyParts(List<String> bodyParts) {
         this.bodyParts = bodyParts;
     }
 

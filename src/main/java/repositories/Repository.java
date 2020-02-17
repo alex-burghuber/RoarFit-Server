@@ -1,7 +1,6 @@
 package repositories;
 
 import data.entities.*;
-import data.enums.BodyPart;
 import helper.EntityManagerHelper;
 import helper.JwtHelper;
 import helper.TimeFormatHelper;
@@ -138,8 +137,13 @@ public class Repository {
                 for (int i = 0; i < jsonArray.length(); ++i) {
                     JSONObject json = jsonArray.getJSONObject(i);
 
-                    ExerciseTemplate template = new ExerciseTemplate(json.getString("name"));
-                    template.getBodyParts().add(json.getEnum(BodyPart.class, "bodyPart"));
+                    JSONArray bodyPartsJA = json.getJSONArray("bodyParts");
+                    int length = bodyPartsJA.length();
+                    String[] bodyParts = new String[length];
+                    for (int j = 0; j < length; ++j) {
+                        bodyParts[j] = bodyPartsJA.getString(j);
+                    }
+                    ExerciseTemplate template = new ExerciseTemplate(json.getString("name"), bodyParts);
 
                     if (!json.isNull("equipment")) {
                         template.setEquipment(json.getString("equipment"));
@@ -196,15 +200,15 @@ public class Repository {
         // create workouts
         Workout workout1 = new Workout(1);
 
-        ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", BodyPart.LEGS);
+        ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", "Beine");
         Exercise exercise1 = new Exercise(template1);
         ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, "3", "5", "45");
 
-        ExerciseTemplate template2 = new ExerciseTemplate("Bankdrücken (20)", BodyPart.CHEST);
+        ExerciseTemplate template2 = new ExerciseTemplate("Bankdrücken (20)", "Brust");
         Exercise exercise2 = new Exercise(template2);
         ExerciseSpecification specification2 = new ExerciseSpecification(exercise2, "3", "5", "32,5");
 
-        ExerciseTemplate template3 = new ExerciseTemplate("KH - Rudern im Stütz + Superman", BodyPart.BACK);
+        ExerciseTemplate template3 = new ExerciseTemplate("KH - Rudern im Stütz + Superman", "Rücken");
         Exercise exercise3 = new Exercise(template3);
         ExerciseSpecification specification3 = new ExerciseSpecification(exercise3, "3", "10/S. 15-20", "2x5");
 
@@ -213,11 +217,11 @@ public class Repository {
 
         Workout workout2 = new Workout(2);
 
-        ExerciseTemplate template4 = new ExerciseTemplate("Military Press", BodyPart.SHOULDER);
+        ExerciseTemplate template4 = new ExerciseTemplate("Military Press", "Schulter");
         Exercise exercise4 = new Exercise(template4);
         ExerciseSpecification specification4 = new ExerciseSpecification(exercise4, "3", "5", "22,5");
 
-        ExerciseTemplate template5 = new ExerciseTemplate("Planksaw", BodyPart.BELLY);
+        ExerciseTemplate template5 = new ExerciseTemplate("Planksaw", "Bauch");
         Exercise exercise5 = new Exercise(template5);
         ExerciseSpecification specification5 = new ExerciseSpecification(exercise5, "3", "10-15");
 
