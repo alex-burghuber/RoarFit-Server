@@ -102,7 +102,8 @@ public class Repository {
         // for jwt validation
         getUserFromJwt(jwt);
 
-        String query = "SELECT t FROM ExerciseTemplate t where LOWER(t.equipment) = LOWER(:equipment)";
+        String query = "select t from ExerciseTemplate t where lower(t.equipment) = lower(:equipment)" +
+                " and t.id != all (select e.template.id from Exercise e)";
         List<ExerciseTemplate> templates = em.createQuery(query, ExerciseTemplate.class)
                 .setParameter("equipment", equipment)
                 .getResultList();
@@ -124,7 +125,6 @@ public class Repository {
     }
 
     public void fillDatabase() {
-
         // load templates
         URL url = Thread.currentThread()
                 .getContextClassLoader()
