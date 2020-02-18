@@ -201,14 +201,18 @@ public class Repository {
         Workout workout1 = new Workout(1);
 
         ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", "Beine");
+        template1.setDescription("Die Kniebeuge ist eine sportliche Übung zur Kräftigung der Muskulatur, insbesondere der Oberschenkelmuskulatur.");
         Exercise exercise1 = new Exercise(template1);
         ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, "3", "5", "45");
+        specification1.setInfo("Never skip leg day.");
 
         ExerciseTemplate template2 = new ExerciseTemplate("Bankdrücken (20)", "Brust");
+        template2.setEquipment("Langhantel");
         Exercise exercise2 = new Exercise(template2);
         ExerciseSpecification specification2 = new ExerciseSpecification(exercise2, "3", "5", "32,5");
 
         ExerciseTemplate template3 = new ExerciseTemplate("KH - Rudern im Stütz + Superman", "Rücken");
+        template3.setEquipment("Kurzhanteln");
         Exercise exercise3 = new Exercise(template3);
         ExerciseSpecification specification3 = new ExerciseSpecification(exercise3, "3", "10/S. 15-20", "2x5");
 
@@ -218,6 +222,7 @@ public class Repository {
         Workout workout2 = new Workout(2);
 
         ExerciseTemplate template4 = new ExerciseTemplate("Military Press", "Schulter");
+        template4.setEquipment("Langhantel");
         Exercise exercise4 = new Exercise(template4);
         ExerciseSpecification specification4 = new ExerciseSpecification(exercise4, "3", "5", "22,5");
 

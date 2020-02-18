@@ -29,11 +29,6 @@ public class ExerciseTemplate {
         bodyParts = new ArrayList<>();
     }
 
-    public ExerciseTemplate(String name) {
-        this();
-        this.name = name;
-    }
-
     public ExerciseTemplate(String name, String... bodyParts) {
         this();
         this.name = name;
