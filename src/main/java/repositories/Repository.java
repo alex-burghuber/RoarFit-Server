@@ -1,5 +1,7 @@
 package repositories;
 
+import data.dto.PersonalExerciseDTO;
+import data.dto.WorkoutExerciseDTO;
 import data.entities.*;
 import helper.EntityManagerHelper;
 import helper.JwtHelper;
@@ -113,6 +115,86 @@ public class Repository {
             templatesJA.put(template.toJson());
         }
         return Response.ok(templatesJA.toString()).build();
+    }
+
+
+    public Response addPersonalExercise(String jwt, PersonalExerciseDTO exerciseDTO) {
+        User user = getUserFromJwt(jwt);
+
+        // get template with query to check if it doesn't belong to a exercise of a specification
+        String query = "SELECT t FROM ExerciseTemplate t WHERE t.id = :templateId " +
+                "AND t.id != ANY (SELECT e.template.id FROM Exercise e JOIN ExerciseSpecification s ON s.exercise.id = e.id)";
+        List<ExerciseTemplate> templates = em.createQuery(query, ExerciseTemplate.class)
+                .setParameter("templateId", exerciseDTO.getTemplateId())
+                .getResultList();
+
+        if (templates.size() == 1) {
+            ExerciseTemplate template = templates.get(0);
+
+            SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
+            try {
+                Date time = formatter.parse(exerciseDTO.getTime());
+
+                Exercise exercise = new Exercise(
+                        template, time, exerciseDTO.getSets(),
+                        exerciseDTO.getReps(), exerciseDTO.getWeight()
+                );
+
+                em.getTransaction().begin();
+                user.getPersonalExercises().add(exercise);
+                em.getTransaction().commit();
+
+                return Response.ok().build();
+            } catch (ParseException e) {
+                System.out.println(exerciseDTO.getTime() + " could not be parsed");
+            }
+        }
+
+        return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+    public Response addWorkoutExercise(String jwt, WorkoutExerciseDTO exerciseDTO) {
+        User user = getUserFromJwt(jwt);
+
+        // get exercise with query to check if it belongs to this user
+        String query = "SELECT e FROM Exercise e " +
+                "JOIN ExerciseSpecification s ON s.exercise = e " +
+                "JOIN Workout w JOIN WorkoutPlan p JOIN User u " +
+                "WHERE u = :user AND e.id = :exerciseId " +
+                "AND s MEMBER OF w.specifications " +
+                "AND w MEMBER OF p.workouts " +
+                "AND p MEMBER OF u.workoutPlans";
+        List<Exercise> exercises = em.createQuery(query, Exercise.class)
+                .setParameter("user", user)
+                .setParameter("exerciseId", exerciseDTO.getExerciseId())
+                .getResultList();
+
+        if (exercises.size() == 1) {
+            Exercise exercise = exercises.get(0);
+
+            SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
+            try {
+                Date time = formatter.parse(exerciseDTO.getTime());
+
+                String specificationQuery = "SELECT s FROM ExerciseSpecification s JOIN Exercise e on s.exercise = e";
+                ExerciseSpecification specification = em.createQuery(specificationQuery, ExerciseSpecification.class)
+                        .getSingleResult();
+
+                em.getTransaction().begin();
+                exercise.setTime(time);
+                exercise.setSets(exerciseDTO.getSets());
+                exercise.setReps(exerciseDTO.getReps());
+                exercise.setWeight(exerciseDTO.getWeight());
+                specification.setCompleted(true);
+                em.getTransaction().commit();
+
+                return Response.ok().build();
+            } catch (ParseException e) {
+                System.out.println(exerciseDTO.getTime() + " could not be parsed");
+            }
+        }
+
+        return Response.status(Response.Status.BAD_REQUEST).build();
     }
 
     private User getUserFromJwt(String jwt) {
