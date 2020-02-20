@@ -135,9 +135,11 @@ public class Repository {
             try {
                 Date time = formatter.parse(exerciseDTO.getTime());
 
+                String weight = removeKgFromWeight(exerciseDTO.getWeight());
+
                 Exercise exercise = new Exercise(
                         template, time, exerciseDTO.getSets(),
-                        exerciseDTO.getReps(), exerciseDTO.getWeight()
+                        exerciseDTO.getReps(), weight
                 );
 
                 em.getTransaction().begin();
@@ -180,11 +182,15 @@ public class Repository {
                 ExerciseSpecification specification = em.createQuery(specificationQuery, ExerciseSpecification.class)
                         .getSingleResult();
 
+
+                String weight = removeKgFromWeight(exerciseDTO.getWeight());
+
+
                 em.getTransaction().begin();
                 exercise.setTime(time);
                 exercise.setSets(exerciseDTO.getSets());
                 exercise.setReps(exerciseDTO.getReps());
-                exercise.setWeight(exerciseDTO.getWeight());
+                exercise.setWeight(weight);
                 specification.setCompleted(true);
                 em.getTransaction().commit();
 
@@ -195,6 +201,13 @@ public class Repository {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+    private String removeKgFromWeight(String weight) {
+        if (weight != null) {
+            weight = weight.replaceAll("kg", "");
+        }
+        return weight;
     }
 
     private User getUserFromJwt(String jwt) {
