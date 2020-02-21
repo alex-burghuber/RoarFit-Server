@@ -104,8 +104,8 @@ public class Repository {
         // for jwt validation
         getUserFromJwt(jwt);
 
-        String query = "select t from ExerciseTemplate t where lower(t.equipment) = lower(:equipment)" +
-                " and t.id != all (select e.template.id from Exercise e)";
+        String query = "SELECT t FROM ExerciseTemplate t WHERE LOWER(t.equipment) = LOWER(:equipment)" +
+                " AND t.id != ALL (SELECT s.exercise.template.id FROM ExerciseSpecification s)";
         List<ExerciseTemplate> templates = em.createQuery(query, ExerciseTemplate.class)
                 .setParameter("equipment", equipment)
                 .getResultList();
@@ -174,29 +174,32 @@ public class Repository {
         if (exercises.size() == 1) {
             Exercise exercise = exercises.get(0);
 
-            SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
-            try {
-                Date time = formatter.parse(exerciseDTO.getTime());
+            String specificationQuery = "SELECT s FROM ExerciseSpecification s WHERE s.exercise = :exercise";
+            ExerciseSpecification specification = em.createQuery(specificationQuery, ExerciseSpecification.class)
+                    .setParameter("exercise", exercise)
+                    .getSingleResult();
 
-                String specificationQuery = "SELECT s FROM ExerciseSpecification s JOIN Exercise e on s.exercise = e";
-                ExerciseSpecification specification = em.createQuery(specificationQuery, ExerciseSpecification.class)
-                        .getSingleResult();
+            if (!specification.isCompleted()) {
+                SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
+                try {
+                    Date time = formatter.parse(exerciseDTO.getTime());
 
+                    String weight = removeKgFromWeight(exerciseDTO.getWeight());
 
-                String weight = removeKgFromWeight(exerciseDTO.getWeight());
+                    em.getTransaction().begin();
+                    exercise.setTime(time);
+                    exercise.setSets(exerciseDTO.getSets());
+                    exercise.setReps(exerciseDTO.getReps());
+                    exercise.setWeight(weight);
+                    specification.setCompleted(true);
+                    em.getTransaction().commit();
 
-
-                em.getTransaction().begin();
-                exercise.setTime(time);
-                exercise.setSets(exerciseDTO.getSets());
-                exercise.setReps(exerciseDTO.getReps());
-                exercise.setWeight(weight);
-                specification.setCompleted(true);
-                em.getTransaction().commit();
-
-                return Response.ok().build();
-            } catch (ParseException e) {
-                System.out.println(exerciseDTO.getTime() + " could not be parsed");
+                    return Response.ok().build();
+                } catch (ParseException e) {
+                    System.out.println(exerciseDTO.getTime() + " could not be parsed");
+                }
+            } else {
+                return Response.status(Response.Status.CONFLICT).build();
             }
         }
 
