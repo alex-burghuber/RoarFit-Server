@@ -45,7 +45,8 @@ public class ExerciseSpecification {
                 .put("sets", sets)
                 .put("reps", reps)
                 .put("weight", weight)
-                .put("info", info);
+                .put("info", info)
+                .put("completed", completed);
     }
 
     public long getId() {
