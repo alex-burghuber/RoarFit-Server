@@ -21,6 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Repository {
 
@@ -139,7 +140,7 @@ public class Repository {
 
                 Exercise exercise = new Exercise(
                         template, time, exerciseDTO.getSets(),
-                        exerciseDTO.getReps(), weight
+                        exerciseDTO.getReps(), weight, exerciseDTO.getCompletedDate()
                 );
 
                 em.getTransaction().begin();
@@ -174,12 +175,7 @@ public class Repository {
         if (exercises.size() == 1) {
             Exercise exercise = exercises.get(0);
 
-            String specificationQuery = "SELECT s FROM ExerciseSpecification s WHERE s.exercise = :exercise";
-            ExerciseSpecification specification = em.createQuery(specificationQuery, ExerciseSpecification.class)
-                    .setParameter("exercise", exercise)
-                    .getSingleResult();
-
-            if (!specification.isCompleted()) {
+            if (exercise.getCompletedDate() == null) {
                 SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
                 try {
                     Date time = formatter.parse(exerciseDTO.getTime());
@@ -191,7 +187,7 @@ public class Repository {
                     exercise.setSets(exerciseDTO.getSets());
                     exercise.setReps(exerciseDTO.getReps());
                     exercise.setWeight(weight);
-                    specification.setCompleted(true);
+                    exercise.setCompletedDate(exerciseDTO.getCompletedDate());
                     em.getTransaction().commit();
 
                     return Response.ok().build();
@@ -204,6 +200,36 @@ public class Repository {
         }
 
         return Response.status(Response.Status.BAD_REQUEST).build();
+    }
+
+    public Response getExerciseHistory(String jwt, int count) {
+        User user = getUserFromJwt(jwt);
+
+        String query = "SELECT e FROM Exercise e JOIN User u " +
+                "WHERE e MEMBER OF u.personalExercises AND u.id = :userId UNION " +
+                "SELECT e FROM Exercise e JOIN ExerciseSpecification s ON s.exercise = e " +
+                "JOIN Workout w JOIN WorkoutPlan p JOIN User u " +
+                "WHERE u.id = :userId " +
+                "AND s MEMBER OF w.specifications " +
+                "AND w MEMBER OF p.workouts " +
+                "AND p MEMBER OF u.workoutPlans " +
+                "AND e.completedDate != null";
+        List<Exercise> exercises = em.createQuery(query, Exercise.class)
+                .setParameter("userId", user.getId())
+                .setFirstResult(count * 15)
+                .setMaxResults(15)
+                .getResultList();
+        exercises = exercises
+                .stream()
+                .sorted((o1, o2) -> o2.getCompletedDate().compareTo(o1.getCompletedDate()))
+                .collect(Collectors.toList());
+
+        JSONArray exerciseJA = new JSONArray();
+        for (Exercise exercise : exercises) {
+            exerciseJA.put(exercise.toJson());
+        }
+
+        return Response.ok(exerciseJA.toString()).build();
     }
 
     private String removeKgFromWeight(String weight) {

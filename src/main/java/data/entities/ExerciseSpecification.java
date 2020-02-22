@@ -20,8 +20,6 @@ public class ExerciseSpecification {
 
     private String info;
 
-    private boolean completed = false;
-
     public ExerciseSpecification() {
     }
 
@@ -45,8 +43,7 @@ public class ExerciseSpecification {
                 .put("sets", sets)
                 .put("reps", reps)
                 .put("weight", weight)
-                .put("info", info)
-                .put("completed", completed);
+                .put("info", info);
     }
 
     public long getId() {
@@ -95,13 +92,5 @@ public class ExerciseSpecification {
 
     public void setInfo(String info) {
         this.info = info;
-    }
-
-    public boolean isCompleted() {
-        return completed;
-    }
-
-    public void setCompleted(boolean completed) {
-        this.completed = completed;
     }
 }

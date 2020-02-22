@@ -24,6 +24,9 @@ public class Exercise {
     private int reps;
     private String weight;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date completedDate;
+
     public Exercise() {
     }
 
@@ -31,12 +34,13 @@ public class Exercise {
         this.template = template;
     }
 
-    public Exercise(ExerciseTemplate template, Date time, int sets, int reps, String weight) {
+    public Exercise(ExerciseTemplate template, Date time, int sets, int reps, String weight, Date completedDate) {
         this.template = template;
         this.time = time;
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
+        this.completedDate = completedDate;
     }
 
     public JSONObject toJson() {
@@ -46,6 +50,9 @@ public class Exercise {
                 .put("sets", sets)
                 .put("reps", reps)
                 .put("weight", weight);
+        if (completedDate != null) {
+            json.put("completedDate", completedDate.getTime());
+        }
         if (time != null) {
             SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
             json.put("time", formatter.format(time));
@@ -99,5 +106,13 @@ public class Exercise {
 
     public void setWeight(String weight) {
         this.weight = weight;
+    }
+
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date completedDate) {
+        this.completedDate = completedDate;
     }
 }

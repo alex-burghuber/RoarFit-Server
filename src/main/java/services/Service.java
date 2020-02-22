@@ -75,6 +75,13 @@ public class Service {
         return repository.addWorkoutExercise(getJwt(auth), exerciseDTO);
     }
 
+    @Path("/exercise-history/{count}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getExerciseHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("count") int count) {
+        return repository.getExerciseHistory(getJwt(auth), count);
+    }
+
     private String getJwt(String auth) {
         if (auth != null) {
             return auth.split("\\s")[1];

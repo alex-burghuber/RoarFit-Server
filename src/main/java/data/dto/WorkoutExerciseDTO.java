@@ -1,5 +1,7 @@
 package data.dto;
 
+import java.util.Date;
+
 public class WorkoutExerciseDTO {
 
     private long exerciseId;
@@ -7,16 +9,18 @@ public class WorkoutExerciseDTO {
     private int sets;
     private int reps;
     private String weight;
+    private Date completedDate;
 
     public WorkoutExerciseDTO() {
     }
 
-    public WorkoutExerciseDTO(long exerciseId, String time, int sets, int reps, String weight) {
+    public WorkoutExerciseDTO(long exerciseId, String time, int sets, int reps, String weight, Date completedDate) {
         this.exerciseId = exerciseId;
         this.time = time;
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
+        this.completedDate = completedDate;
     }
 
     public long getExerciseId() {
@@ -57,5 +61,13 @@ public class WorkoutExerciseDTO {
 
     public void setWeight(String weight) {
         this.weight = weight;
+    }
+
+    public Date getCompletedDate() {
+        return completedDate;
+    }
+
+    public void setCompletedDate(Date completedDate) {
+        this.completedDate = completedDate;
     }
 }
