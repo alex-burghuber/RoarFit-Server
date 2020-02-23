@@ -205,9 +205,8 @@ public class Repository {
     public Response getExerciseHistory(String jwt, int count) {
         User user = getUserFromJwt(jwt);
 
-        String query = "SELECT e FROM Exercise e JOIN User u " +
-                "WHERE e MEMBER OF u.personalExercises AND u.id = :userId UNION " +
-                "SELECT e FROM Exercise e JOIN ExerciseSpecification s ON s.exercise = e " +
+        // get exercises from workout plans
+        String query = "SELECT e FROM Exercise e JOIN ExerciseSpecification s ON s.exercise = e " +
                 "JOIN Workout w JOIN WorkoutPlan p JOIN User u " +
                 "WHERE u.id = :userId " +
                 "AND s MEMBER OF w.specifications " +
@@ -219,6 +218,11 @@ public class Repository {
                 .setFirstResult(count * 15)
                 .setMaxResults(15)
                 .getResultList();
+
+        // get exercises from personal exercises
+        exercises.addAll(user.getPersonalExercises());
+
+        // sort by date
         exercises = exercises
                 .stream()
                 .sorted((o1, o2) -> o2.getCompletedDate().compareTo(o1.getCompletedDate()))
