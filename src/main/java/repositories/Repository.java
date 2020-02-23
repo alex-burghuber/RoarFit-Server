@@ -206,26 +206,35 @@ public class Repository {
         User user = getUserFromJwt(jwt);
 
         // get exercises from workout plans
-        String query = "SELECT e FROM Exercise e JOIN ExerciseSpecification s ON s.exercise = e " +
+        String workoutExercisesQuery = "SELECT e FROM Exercise e JOIN ExerciseSpecification s ON s.exercise = e " +
                 "JOIN Workout w JOIN WorkoutPlan p JOIN User u " +
                 "WHERE u.id = :userId " +
                 "AND s MEMBER OF w.specifications " +
                 "AND w MEMBER OF p.workouts " +
                 "AND p MEMBER OF u.workoutPlans " +
                 "AND e.completedDate != null";
-        List<Exercise> exercises = em.createQuery(query, Exercise.class)
+        List<Exercise> exercises = em.createQuery(workoutExercisesQuery, Exercise.class)
                 .setParameter("userId", user.getId())
                 .setFirstResult(count * 15)
                 .setMaxResults(15)
                 .getResultList();
 
         // get exercises from personal exercises
-        exercises.addAll(user.getPersonalExercises());
+        String personalExercisesQuery = "SELECT e FROM Exercise e JOIN User u " +
+                "WHERE e MEMBER OF u.personalExercises AND u.id = :userId";
+        List<Exercise> personalExercises = em.createQuery(personalExercisesQuery, Exercise.class)
+                .setParameter("userId", user.getId())
+                .setFirstResult(count * 15)
+                .setMaxResults(15)
+                .getResultList();
+
+        exercises.addAll(personalExercises);
 
         // sort by date
         exercises = exercises
                 .stream()
                 .sorted((o1, o2) -> o2.getCompletedDate().compareTo(o1.getCompletedDate()))
+                .limit(15)
                 .collect(Collectors.toList());
 
         JSONArray exerciseJA = new JSONArray();
