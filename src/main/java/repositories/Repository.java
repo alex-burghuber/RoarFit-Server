@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Repository {
 
@@ -206,36 +205,22 @@ public class Repository {
         User user = getUserFromJwt(jwt);
 
         // get exercises from workout plans
-        String workoutExercisesQuery = "SELECT e FROM Exercise e JOIN ExerciseSpecification s ON s.exercise = e " +
-                "JOIN Workout w JOIN WorkoutPlan p JOIN User u " +
-                "WHERE u.id = :userId " +
-                "AND s MEMBER OF w.specifications " +
+        String query = "SELECT e FROM Exercise e " +
+                "WHERE e IN (SELECT e FROM Exercise e JOIN User u ON u.id = :userId WHERE e MEMBER OF u.personalExercises) " +
+                "OR e IN (" +
+                "SELECT e FROM Exercise e " +
+                "JOIN User u ON u.id = :userId " +
+                "JOIN ExerciseSpecification s ON s.exercise = e " +
+                "JOIN Workout w " +
+                "JOIN WorkoutPlan p " +
+                "WHERE s MEMBER OF w.specifications " +
                 "AND w MEMBER OF p.workouts " +
-                "AND p MEMBER OF u.workoutPlans " +
-                "AND e.completedDate != null";
-        List<Exercise> exercises = em.createQuery(workoutExercisesQuery, Exercise.class)
+                "AND e.completedDate != null) ORDER BY e.completedDate DESC";
+        List<Exercise> exercises = em.createQuery(query, Exercise.class)
                 .setParameter("userId", user.getId())
                 .setFirstResult(count * 15)
                 .setMaxResults(15)
                 .getResultList();
-
-        // get exercises from personal exercises
-        String personalExercisesQuery = "SELECT e FROM Exercise e JOIN User u " +
-                "WHERE e MEMBER OF u.personalExercises AND u.id = :userId";
-        List<Exercise> personalExercises = em.createQuery(personalExercisesQuery, Exercise.class)
-                .setParameter("userId", user.getId())
-                .setFirstResult(count * 15)
-                .setMaxResults(15)
-                .getResultList();
-
-        exercises.addAll(personalExercises);
-
-        // sort by date
-        exercises = exercises
-                .stream()
-                .sorted((o1, o2) -> o2.getCompletedDate().compareTo(o1.getCompletedDate()))
-                .limit(15)
-                .collect(Collectors.toList());
 
         JSONArray exerciseJA = new JSONArray();
         for (Exercise exercise : exercises) {
