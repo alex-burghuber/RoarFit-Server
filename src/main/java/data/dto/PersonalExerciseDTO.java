@@ -8,13 +8,13 @@ public class PersonalExerciseDTO {
     private String time;
     private int sets;
     private int reps;
-    private String weight;
+    private int weight;
     private Date completedDate;
 
     public PersonalExerciseDTO() {
     }
 
-    public PersonalExerciseDTO(long templateId, String time, int sets, int reps, String weight, Date completedDate) {
+    public PersonalExerciseDTO(long templateId, String time, int sets, int reps, int weight, Date completedDate) {
         this.templateId = templateId;
         this.time = time;
         this.sets = sets;
@@ -55,11 +55,11 @@ public class PersonalExerciseDTO {
         this.reps = reps;
     }
 
-    public String getWeight() {
+    public int getWeight() {
         return weight;
     }
 
-    public void setWeight(String weight) {
+    public void setWeight(int weight) {
         this.weight = weight;
     }
 

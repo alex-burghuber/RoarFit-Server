@@ -135,11 +135,9 @@ public class Repository {
             try {
                 Date time = formatter.parse(exerciseDTO.getTime());
 
-                String weight = removeKgFromWeight(exerciseDTO.getWeight());
-
                 Exercise exercise = new Exercise(
                         template, time, exerciseDTO.getSets(),
-                        exerciseDTO.getReps(), weight, exerciseDTO.getCompletedDate()
+                        exerciseDTO.getReps(), exerciseDTO.getWeight(), exerciseDTO.getCompletedDate()
                 );
 
                 em.getTransaction().begin();
@@ -179,13 +177,11 @@ public class Repository {
                 try {
                     Date time = formatter.parse(exerciseDTO.getTime());
 
-                    String weight = removeKgFromWeight(exerciseDTO.getWeight());
-
                     em.getTransaction().begin();
                     exercise.setTime(time);
                     exercise.setSets(exerciseDTO.getSets());
                     exercise.setReps(exerciseDTO.getReps());
-                    exercise.setWeight(weight);
+                    exercise.setWeight(exerciseDTO.getWeight());
                     exercise.setCompletedDate(exerciseDTO.getCompletedDate());
                     em.getTransaction().commit();
 
@@ -206,7 +202,9 @@ public class Repository {
 
         // get exercises from workout plans
         String query = "SELECT e FROM Exercise e " +
-                "WHERE e IN (SELECT e FROM Exercise e JOIN User u ON u.id = :userId WHERE e MEMBER OF u.personalExercises) " +
+                "WHERE e IN (" +
+                "SELECT e FROM Exercise e JOIN User u ON u.id = :userId " +
+                "WHERE e MEMBER OF u.personalExercises) " +
                 "OR e IN (" +
                 "SELECT e FROM Exercise e " +
                 "JOIN User u ON u.id = :userId " +
@@ -228,13 +226,6 @@ public class Repository {
         }
 
         return Response.ok(exerciseJA.toString()).build();
-    }
-
-    private String removeKgFromWeight(String weight) {
-        if (weight != null) {
-            weight = weight.replaceAll("kg", "");
-        }
-        return weight;
     }
 
     private User getUserFromJwt(String jwt) {
@@ -325,18 +316,18 @@ public class Repository {
         ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", "Beine");
         template1.setDescription("Die Kniebeuge ist eine sportliche Übung zur Kräftigung der Muskulatur, insbesondere der Oberschenkelmuskulatur.");
         Exercise exercise1 = new Exercise(template1);
-        ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, "3", "5", "45");
+        ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, 3, 5, 45f);
         specification1.setInfo("Never skip leg day.");
 
         ExerciseTemplate template2 = new ExerciseTemplate("Bankdrücken (20)", "Brust");
         template2.setEquipment("Langhantel");
         Exercise exercise2 = new Exercise(template2);
-        ExerciseSpecification specification2 = new ExerciseSpecification(exercise2, "3", "5", "32,5");
+        ExerciseSpecification specification2 = new ExerciseSpecification(exercise2, 3, 5, 32.5f);
 
         ExerciseTemplate template3 = new ExerciseTemplate("KH - Rudern im Stütz + Superman", "Rücken");
         template3.setEquipment("Kurzhanteln");
         Exercise exercise3 = new Exercise(template3);
-        ExerciseSpecification specification3 = new ExerciseSpecification(exercise3, "3", "10/S. 15-20", "2x5");
+        ExerciseSpecification specification3 = new ExerciseSpecification(exercise3, 3, 15, 10f);
 
         workout1.getSpecifications().addAll(Arrays.asList(specification1, specification2, specification3));
         workoutPlan1.getWorkouts().add(workout1);
@@ -346,11 +337,11 @@ public class Repository {
         ExerciseTemplate template4 = new ExerciseTemplate("Military Press", "Schulter");
         template4.setEquipment("Langhantel");
         Exercise exercise4 = new Exercise(template4);
-        ExerciseSpecification specification4 = new ExerciseSpecification(exercise4, "3", "5", "22,5");
+        ExerciseSpecification specification4 = new ExerciseSpecification(exercise4, 3, 5, 22.5f);
 
         ExerciseTemplate template5 = new ExerciseTemplate("Planksaw", "Bauch");
         Exercise exercise5 = new Exercise(template5);
-        ExerciseSpecification specification5 = new ExerciseSpecification(exercise5, "3", "10-15");
+        ExerciseSpecification specification5 = new ExerciseSpecification(exercise5, 3, 10);
 
         workout2.getSpecifications().addAll(Arrays.asList(specification4, specification5));
         workoutPlan1.getWorkouts().add(workout2);

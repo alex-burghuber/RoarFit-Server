@@ -22,7 +22,7 @@ public class Exercise {
 
     private int sets;
     private int reps;
-    private String weight;
+    private float weight;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date completedDate;
@@ -34,7 +34,7 @@ public class Exercise {
         this.template = template;
     }
 
-    public Exercise(ExerciseTemplate template, Date time, int sets, int reps, String weight, Date completedDate) {
+    public Exercise(ExerciseTemplate template, Date time, int sets, int reps, float weight, Date completedDate) {
         this.template = template;
         this.time = time;
         this.sets = sets;
@@ -100,11 +100,11 @@ public class Exercise {
         this.reps = reps;
     }
 
-    public String getWeight() {
+    public float getWeight() {
         return weight;
     }
 
-    public void setWeight(String weight) {
+    public void setWeight(float weight) {
         this.weight = weight;
     }
 

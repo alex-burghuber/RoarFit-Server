@@ -14,22 +14,22 @@ public class ExerciseSpecification {
     @OneToOne(cascade = CascadeType.PERSIST)
     private Exercise exercise;
 
-    private String sets;
-    private String reps;
-    private String weight;
+    private int sets;
+    private int reps;
+    private float weight;
 
     private String info;
 
     public ExerciseSpecification() {
     }
 
-    public ExerciseSpecification(Exercise exercise, String sets, String reps) {
+    public ExerciseSpecification(Exercise exercise, int sets, int reps) {
         this.exercise = exercise;
         this.sets = sets;
         this.reps = reps;
     }
 
-    public ExerciseSpecification(Exercise exercise, String sets, String reps, String weight) {
+    public ExerciseSpecification(Exercise exercise, int sets, int reps, float weight) {
         this.exercise = exercise;
         this.sets = sets;
         this.reps = reps;
@@ -62,27 +62,27 @@ public class ExerciseSpecification {
         this.exercise = completedExercise;
     }
 
-    public String getSets() {
+    public int getSets() {
         return sets;
     }
 
-    public void setSets(String sets) {
+    public void setSets(int sets) {
         this.sets = sets;
     }
 
-    public String getReps() {
+    public int getReps() {
         return reps;
     }
 
-    public void setReps(String reps) {
+    public void setReps(int reps) {
         this.reps = reps;
     }
 
-    public String getWeight() {
+    public float getWeight() {
         return weight;
     }
 
-    public void setWeight(String weight) {
+    public void setWeight(float weight) {
         this.weight = weight;
     }
 

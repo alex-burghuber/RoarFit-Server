@@ -8,13 +8,13 @@ public class WorkoutExerciseDTO {
     private String time;
     private int sets;
     private int reps;
-    private String weight;
+    private int weight;
     private Date completedDate;
 
     public WorkoutExerciseDTO() {
     }
 
-    public WorkoutExerciseDTO(long exerciseId, String time, int sets, int reps, String weight, Date completedDate) {
+    public WorkoutExerciseDTO(long exerciseId, String time, int sets, int reps, int weight, Date completedDate) {
         this.exerciseId = exerciseId;
         this.time = time;
         this.sets = sets;
@@ -55,11 +55,11 @@ public class WorkoutExerciseDTO {
         this.reps = reps;
     }
 
-    public String getWeight() {
+    public int getWeight() {
         return weight;
     }
 
-    public void setWeight(String weight) {
+    public void setWeight(int weight) {
         this.weight = weight;
     }
 
