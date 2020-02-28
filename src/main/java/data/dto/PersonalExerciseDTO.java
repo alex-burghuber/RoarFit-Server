@@ -8,7 +8,7 @@ public class PersonalExerciseDTO {
     private String time;
     private int sets;
     private int reps;
-    private int weight;
+    private float weight;
     private Date completedDate;
 
     public PersonalExerciseDTO() {
@@ -55,11 +55,11 @@ public class PersonalExerciseDTO {
         this.reps = reps;
     }
 
-    public int getWeight() {
+    public float getWeight() {
         return weight;
     }
 
-    public void setWeight(int weight) {
+    public void setWeight(float weight) {
         this.weight = weight;
     }
 
