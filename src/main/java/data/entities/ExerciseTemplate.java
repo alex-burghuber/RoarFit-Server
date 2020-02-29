@@ -25,6 +25,8 @@ public class ExerciseTemplate {
 
     private String description;
 
+    private String videoUrl;
+
     public ExerciseTemplate() {
         bodyParts = new ArrayList<>();
     }
@@ -41,7 +43,8 @@ public class ExerciseTemplate {
                 .put("name", name)
                 .put("equipment", equipment)
                 .put("description", description)
-                .put("bodyParts", bodyParts);
+                .put("bodyParts", bodyParts)
+                .put("videoUrl", videoUrl);
     }
 
     public long getId() {
@@ -82,5 +85,13 @@ public class ExerciseTemplate {
 
     public void setDescription(String desc) {
         this.description = desc;
+    }
+
+    public String getVideoUrl() {
+        return videoUrl;
+    }
+
+    public void setVideoUrl(String videoUrl) {
+        this.videoUrl = videoUrl;
     }
 }
