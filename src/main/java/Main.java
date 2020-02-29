@@ -11,9 +11,10 @@ import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static utils.Constants.BASE_URI;
+
 public class Main {
 
-    public static final String BASE_URI = "http://0.0.0.0:8181";
     private static Logger LOG = Logger.getLogger(Main.class.getName());
 
     public static void main(String[] args) {

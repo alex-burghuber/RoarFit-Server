@@ -22,6 +22,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static utils.Constants.VM_MEDIA_URI;
+
 public class Repository {
 
     private EntityManager em;
@@ -315,7 +317,7 @@ public class Repository {
 
         ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", "Beine");
         template1.setDescription("Die Kniebeuge ist eine sportliche Übung zur Kräftigung der Muskulatur, insbesondere der Oberschenkelmuskulatur.");
-        template1.setVideoUrl("https://vm102.htl-leonding.ac.at/media/videos/leaves.mp4");
+        template1.setVideoUrl(VM_MEDIA_URI + "tea.mp4");
         Exercise exercise1 = new Exercise(template1);
         ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, 3, 5, 45f);
         specification1.setInfo("Never skip leg day.");
