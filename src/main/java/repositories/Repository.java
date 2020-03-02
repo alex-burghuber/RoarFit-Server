@@ -209,12 +209,13 @@ public class Repository {
                 "WHERE e MEMBER OF u.personalExercises) " +
                 "OR e IN (" +
                 "SELECT e FROM Exercise e " +
-                "JOIN User u ON u.id = :userId " +
                 "JOIN ExerciseSpecification s ON s.exercise = e " +
                 "JOIN Workout w " +
                 "JOIN WorkoutPlan p " +
+                "JOIN User u ON u.id = :userId " +
                 "WHERE s MEMBER OF w.specifications " +
                 "AND w MEMBER OF p.workouts " +
+                "AND p MEMBER OF u.workoutPlans " +
                 "AND e.completedDate != null) ORDER BY e.completedDate DESC";
         List<Exercise> exercises = em.createQuery(query, Exercise.class)
                 .setParameter("userId", user.getId())
