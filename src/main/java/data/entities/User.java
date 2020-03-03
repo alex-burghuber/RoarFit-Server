@@ -2,39 +2,25 @@ package data.entities;
 
 import org.json.JSONObject;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.*;
 
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
 @Entity
 public class User {
 
     @Id
+    @GeneratedValue
     private long id;
 
     private String username;
     private String password;
-
     private String firstName;
     private String lastName;
 
-    @OneToMany(cascade = CascadeType.PERSIST)
-    private List<WorkoutPlan> workoutPlans;
-
-    @OneToMany(cascade = CascadeType.PERSIST)
-    private List<Exercise> personalExercises;
-
     public User() {
-        workoutPlans = new ArrayList<>();
-        personalExercises = new ArrayList<>();
     }
 
-    public User(int id, String username, String password, String firstName, String lastName) {
-        this();
-        this.id = id;
+    public User(String username, String password, String firstName, String lastName) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
@@ -86,21 +72,5 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public List<WorkoutPlan> getWorkoutPlans() {
-        return workoutPlans;
-    }
-
-    public void setWorkoutPlans(List<WorkoutPlan> workoutPlans) {
-        this.workoutPlans = workoutPlans;
-    }
-
-    public List<Exercise> getPersonalExercises() {
-        return personalExercises;
-    }
-
-    public void setPersonalExercises(List<Exercise> personalExercises) {
-        this.personalExercises = personalExercises;
     }
 }

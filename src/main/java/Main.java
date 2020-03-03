@@ -2,7 +2,7 @@ import helper.EntityManagerHelper;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import repositories.Repository;
+import repositories.MemberRepository;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class Main {
                 EntityManagerHelper.setProperties(properties);
 
                 // fill the database with templates and placeholders
-                Repository.getInstance().fillDatabase();
+                MemberRepository.getInstance().fillDatabase();
             }
         }
 

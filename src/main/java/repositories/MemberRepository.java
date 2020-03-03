@@ -24,36 +24,38 @@ import java.util.List;
 
 import static utils.Constants.VM_MEDIA_URI;
 
-public class Repository {
+public class MemberRepository {
 
     private EntityManager em;
     private JwtHelper jwtHelper;
 
-    private static Repository repository;
+    private static MemberRepository repository;
 
-    private Repository() {
+    private MemberRepository() {
         em = EntityManagerHelper.getInstance();
         jwtHelper = new JwtHelper();
     }
 
-    public static Repository getInstance() {
+    public static MemberRepository getInstance() {
         if (repository == null) {
-            repository = new Repository();
+            repository = new MemberRepository();
         }
         return repository;
     }
 
     public Response login(String username, String password) {
-        // check if an user with this username exists
-        List<User> results = em.createQuery("select u from User u where u.username = :username", User.class)
+        // check if a member with this username exists
+        List<StudioMember> results = em.createQuery("SELECT m FROM StudioMember m WHERE m.username = :username", StudioMember.class)
                 .setParameter("username", username)
                 .getResultList();
-        if (results.size() != 0) {
-            User user = results.get(0);
-            // check if the password is correct
-            if (user.getPassword().equals(password)) {
 
-                String jwt = jwtHelper.create(user.getId());
+        if (results.size() != 0) {
+            StudioMember member = results.get(0);
+
+            // check if the password is correct
+            if (member.getPassword().equals(password)) {
+
+                String jwt = jwtHelper.create(member.getId());
                 JSONObject json = new JSONObject()
                         .put("token", jwt);
                 return Response.ok(json.toString()).build();
@@ -63,15 +65,15 @@ public class Repository {
     }
 
     public Response getUser(String jwt) {
-        User user = getUserFromJwt(jwt);
-        return Response.ok(user.toJson().toString()).build();
+        StudioMember member = getMemberFromJwt(jwt);
+        return Response.ok(member.toJson().toString()).build();
     }
 
     public Response getWorkoutPlans(String jwt) {
-        User user = getUserFromJwt(jwt);
+        StudioMember member = getMemberFromJwt(jwt);
 
         JSONArray plansJA = new JSONArray();
-        for (WorkoutPlan plan : user.getWorkoutPlans()) {
+        for (WorkoutPlan plan : member.getWorkoutPlans()) {
             JSONObject planJO = plan.toJson();
 
             JSONArray workoutsJA = new JSONArray();
@@ -93,7 +95,7 @@ public class Repository {
 
     public Response getEquipment(String jwt) {
         // for jwt validation
-        getUserFromJwt(jwt);
+        getMemberFromJwt(jwt);
 
         String query = "SELECT DISTINCT t.equipment FROM ExerciseTemplate t where t.equipment != null";
         List<String> equipment = em.createQuery(query, String.class)
@@ -104,7 +106,7 @@ public class Repository {
 
     public Response getExerciseTemplates(String jwt, String equipment) {
         // for jwt validation
-        getUserFromJwt(jwt);
+        getMemberFromJwt(jwt);
 
         String query = "SELECT t FROM ExerciseTemplate t WHERE LOWER(t.equipment) = LOWER(:equipment)" +
                 " AND t.id != ALL (SELECT s.exercise.template.id FROM ExerciseSpecification s)";
@@ -121,7 +123,7 @@ public class Repository {
 
 
     public Response addPersonalExercise(String jwt, PersonalExerciseDTO exerciseDTO) {
-        User user = getUserFromJwt(jwt);
+        StudioMember member = getMemberFromJwt(jwt);
 
         // get template with query to check if it doesn't belong to a exercise of a specification
         String query = "SELECT t FROM ExerciseTemplate t WHERE t.id = :templateId " +
@@ -143,7 +145,7 @@ public class Repository {
                 );
 
                 em.getTransaction().begin();
-                user.getPersonalExercises().add(exercise);
+                member.getPersonalExercises().add(exercise);
                 em.getTransaction().commit();
 
                 return Response.ok().build();
@@ -156,18 +158,18 @@ public class Repository {
     }
 
     public Response addWorkoutExercise(String jwt, WorkoutExerciseDTO exerciseDTO) {
-        User user = getUserFromJwt(jwt);
+        StudioMember member = getMemberFromJwt(jwt);
 
         // get exercise with query to check if it belongs to this user
         String query = "SELECT e FROM Exercise e " +
                 "JOIN ExerciseSpecification s ON s.exercise = e " +
-                "JOIN Workout w JOIN WorkoutPlan p JOIN User u " +
-                "WHERE u = :user AND e.id = :exerciseId " +
+                "JOIN Workout w JOIN WorkoutPlan p JOIN StudioMember m " +
+                "WHERE m = :member AND e.id = :exerciseId " +
                 "AND s MEMBER OF w.specifications " +
                 "AND w MEMBER OF p.workouts " +
-                "AND p MEMBER OF u.workoutPlans";
+                "AND p MEMBER OF m.workoutPlans";
         List<Exercise> exercises = em.createQuery(query, Exercise.class)
-                .setParameter("user", user)
+                .setParameter("member", member)
                 .setParameter("exerciseId", exerciseDTO.getExerciseId())
                 .getResultList();
 
@@ -200,25 +202,25 @@ public class Repository {
     }
 
     public Response getExerciseHistory(String jwt, int count) {
-        User user = getUserFromJwt(jwt);
+        StudioMember member = getMemberFromJwt(jwt);
 
         // get exercises from workout plans
         String query = "SELECT e FROM Exercise e " +
                 "WHERE e IN (" +
-                "SELECT e FROM Exercise e JOIN User u ON u.id = :userId " +
-                "WHERE e MEMBER OF u.personalExercises) " +
+                "SELECT e FROM Exercise e JOIN StudioMember m ON m.id = :memberId " +
+                "WHERE e MEMBER OF m.personalExercises) " +
                 "OR e IN (" +
                 "SELECT e FROM Exercise e " +
                 "JOIN ExerciseSpecification s ON s.exercise = e " +
                 "JOIN Workout w " +
                 "JOIN WorkoutPlan p " +
-                "JOIN User u ON u.id = :userId " +
+                "JOIN StudioMember m ON m.id = :memberId " +
                 "WHERE s MEMBER OF w.specifications " +
                 "AND w MEMBER OF p.workouts " +
-                "AND p MEMBER OF u.workoutPlans " +
+                "AND p MEMBER OF m.workoutPlans " +
                 "AND e.completedDate != null) ORDER BY e.completedDate DESC";
         List<Exercise> exercises = em.createQuery(query, Exercise.class)
-                .setParameter("userId", user.getId())
+                .setParameter("memberId", member.getId())
                 .setFirstResult(count * 15)
                 .setMaxResults(15)
                 .getResultList();
@@ -231,13 +233,13 @@ public class Repository {
         return Response.ok(exerciseJA.toString()).build();
     }
 
-    private User getUserFromJwt(String jwt) {
+    private StudioMember getMemberFromJwt(String jwt) {
         long id = jwtHelper.getUserId(jwt);
-        User user = em.find(User.class, id);
-        if (user == null) {
+        StudioMember member = em.find(StudioMember.class, id);
+        if (member == null) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
-        return user;
+        return member;
     }
 
     public void fillDatabase() {
@@ -280,12 +282,12 @@ public class Repository {
             throw new RuntimeException("Exercise templates file not found");
         }
 
-        // create user
-        User user1 = new User(8387, "Alex123", "123ALEXtest", "Alex", "Burg");
-        User user2 = new User(8383, "Pfeff", "PfeffPwd", "Mr", "Pepper");
+        // create members
+        StudioMember member1 = new StudioMember("Alex123", "123ALEXtest", "Alex", "Burg");
+        StudioMember member2 = new StudioMember("Pfeff", "PfeffPwd", "Mr", "Pepper");
         em.getTransaction().begin();
-        em.persist(user1);
-        em.persist(user2);
+        em.persist(member1);
+        em.persist(member2);
         em.getTransaction().commit();
 
         List<ExerciseTemplate> templates
@@ -295,8 +297,8 @@ public class Repository {
         WorkoutPlan workoutPlan2 = createWorkoutPlan();
 
         em.getTransaction().begin();
-        user1.getWorkoutPlans().add(workoutPlan1);
-        user2.getWorkoutPlans().add(workoutPlan2);
+        member1.getWorkoutPlans().add(workoutPlan1);
+        member2.getWorkoutPlans().add(workoutPlan2);
         em.getTransaction().commit();
     }
 

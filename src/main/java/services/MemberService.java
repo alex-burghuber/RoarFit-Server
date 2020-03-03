@@ -4,7 +4,7 @@ import data.dto.LoginDTO;
 import data.dto.PersonalExerciseDTO;
 import data.dto.TemplateDTO;
 import data.dto.WorkoutExerciseDTO;
-import repositories.Repository;
+import repositories.MemberRepository;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.HttpHeaders;
@@ -13,16 +13,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
 
 @Provider
-@Path("/roarfit")
-public class Service {
+@Path("/member")
+public class MemberService {
 
-    private Repository repository = Repository.getInstance();
-
-    @Path("/hello")
-    @GET
-    public String greetings() {
-        return "Hello there!";
-    }
+    private MemberRepository repository = MemberRepository.getInstance();
 
     @Path("/login")
     @POST
