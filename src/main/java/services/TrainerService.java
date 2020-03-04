@@ -3,10 +3,8 @@ package services;
 import data.dto.LoginDTO;
 import repositories.TrainerRepository;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
@@ -23,5 +21,19 @@ public class TrainerService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(LoginDTO login) {
         return repository.login(login.getUsername(), login.getPassword());
+    }
+
+    @Path("/clients")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getClients(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth) {
+        return repository.getClients(getJwt(auth));
+    }
+
+    private String getJwt(String auth) {
+        if (auth != null) {
+            return auth.split("\\s")[1];
+        }
+        throw new WebApplicationException(Response.Status.UNAUTHORIZED);
     }
 }

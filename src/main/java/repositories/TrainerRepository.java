@@ -3,9 +3,11 @@ package repositories;
 import data.entities.Trainer;
 import helper.EntityManagerHelper;
 import helper.JwtHelper;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.persistence.EntityManager;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import java.util.List;
 
@@ -47,5 +49,23 @@ public class TrainerRepository {
             }
         }
         return Response.status(Response.Status.UNAUTHORIZED).build();
+    }
+
+    public Response getClients(String jwt) {
+        Trainer trainer = getTrainerFromJwt(jwt);
+
+        JSONArray clientJA = new JSONArray();
+        trainer.getClients().forEach(client -> clientJA.put(client.toJson()));
+
+        return Response.ok(clientJA.toString()).build();
+    }
+
+    private Trainer getTrainerFromJwt(String jwt) {
+        long id = jwtHelper.getUserId(jwt);
+        Trainer trainer = em.find(Trainer.class, id);
+        if (trainer == null) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        }
+        return trainer;
     }
 }

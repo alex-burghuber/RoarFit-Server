@@ -282,16 +282,25 @@ public class MemberRepository {
             throw new RuntimeException("Exercise templates file not found");
         }
 
-        // create members
+        // create members & trainer
         StudioMember member1 = new StudioMember("Alex123", "123ALEXtest", "Alex", "Burg");
         StudioMember member2 = new StudioMember("Pfeff", "PfeffPwd", "Mr", "Pepper");
+        StudioMember member3 = new StudioMember("GhostMember", "spookyPwd", "TheStudioElite", "BornToCompete");
+
+        Trainer trainer1 = new Trainer("To train or not to train", "trainPwd1", "Genericus", "Trainerus");
+        trainer1.getClients().add(member1);
+        trainer1.getClients().add(member2);
+
+        Trainer trainer2 = new Trainer("Tschu Tschu", "trainPwd2", "Ilike", "Trains");
+        trainer2.getClients().add(member3);
+
         em.getTransaction().begin();
-        em.persist(member1);
-        em.persist(member2);
+        em.persist(trainer1);
+        em.persist(trainer2);
         em.getTransaction().commit();
 
         List<ExerciseTemplate> templates
-                = em.createQuery("select t from ExerciseTemplate t", ExerciseTemplate.class).getResultList();
+                = em.createQuery("SELECT t FROM ExerciseTemplate t", ExerciseTemplate.class).getResultList();
 
         WorkoutPlan workoutPlan1 = createWorkoutPlan();
         WorkoutPlan workoutPlan2 = createWorkoutPlan();

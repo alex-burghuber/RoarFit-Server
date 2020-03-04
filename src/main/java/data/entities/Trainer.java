@@ -2,6 +2,7 @@ package data.entities;
 
 import org.json.JSONObject;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import java.util.ArrayList;
@@ -10,7 +11,7 @@ import java.util.List;
 @Entity
 public class Trainer extends User {
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.PERSIST)
     private List<StudioMember> clients = new ArrayList<>();
 
     public Trainer() {

@@ -4,7 +4,7 @@ import org.json.JSONObject;
 
 import javax.persistence.*;
 
-@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @Entity
 public class User {
 
@@ -29,6 +29,7 @@ public class User {
 
     public JSONObject toJson() {
         return new JSONObject()
+                .put("id", id)
                 .put("username", username)
                 .put("firstName", firstName)
                 .put("lastName", lastName);
