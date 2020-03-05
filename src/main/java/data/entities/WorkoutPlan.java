@@ -41,6 +41,14 @@ public class WorkoutPlan {
         this.cooldown = cooldown;
     }
 
+    public WorkoutPlan(String name, Date warmup, Date cooldown, String info) {
+        this();
+        this.name = name;
+        this.warmup = warmup;
+        this.cooldown = cooldown;
+        this.info = info;
+    }
+
     public JSONObject toJson() {
         SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
         return new JSONObject()

@@ -30,10 +30,11 @@ public class Workout {
         this.day = day;
     }
 
-    public Workout(int day, int week) {
+    public Workout(int day, int week, String info) {
         this();
         this.day = day;
         this.week = week;
+        this.info = info;
     }
 
     public JSONObject toJson() {

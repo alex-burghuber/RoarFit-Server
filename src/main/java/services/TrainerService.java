@@ -2,6 +2,7 @@ package services;
 
 import data.dto.CreateClientDTO;
 import data.dto.LoginDTO;
+import data.dto.addworkoutplan.WorkoutPlanDTO;
 import repositories.TrainerRepository;
 
 import javax.ws.rs.*;
@@ -48,6 +49,28 @@ public class TrainerService {
     @DELETE
     public Response removeClient(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("memberId") long memberId) {
         return repository.removeClient(getJwt(auth), memberId);
+    }
+
+    @Path("/workoutplan/{memberId}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("memberId") long memberId) {
+        return repository.getWorkoutPlan(getJwt(auth), memberId);
+    }
+
+    @Path("/workoutplan/{memberId}")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response addWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
+                                   @PathParam("memberId") long memberId, WorkoutPlanDTO workoutPlanDTO) {
+        return repository.addWorkoutPlan(getJwt(auth), memberId, workoutPlanDTO);
+    }
+
+    @Path("/workoutplan/{memberId}/{workoutPlanId}")
+    @DELETE
+    public Response archiveWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
+                                       @PathParam("memberId") long memberId, @PathParam("workoutPlanId") long workoutPlanId) {
+        return repository.archiveWorkoutPlan(getJwt(auth), memberId, workoutPlanId);
     }
 
     private String getJwt(String auth) {

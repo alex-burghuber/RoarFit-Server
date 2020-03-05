@@ -37,6 +37,15 @@ public class ExerciseTemplate {
         this.bodyParts.addAll(Arrays.asList(bodyParts));
     }
 
+    public ExerciseTemplate(String name, String equipment, String description, String videoUrl, List<String> bodyParts) {
+        this();
+        this.name = name;
+        this.equipment = equipment;
+        this.description = description;
+        this.videoUrl = videoUrl;
+        this.bodyParts = bodyParts;
+    }
+
     public JSONObject toJson() {
         return new JSONObject()
                 .put("id", id)

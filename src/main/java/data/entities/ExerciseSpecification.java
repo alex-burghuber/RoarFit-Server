@@ -36,6 +36,13 @@ public class ExerciseSpecification {
         this.weight = weight;
     }
 
+    public ExerciseSpecification(int sets, int reps, float weight, String info) {
+        this.sets = sets;
+        this.reps = reps;
+        this.weight = weight;
+        this.info = info;
+    }
+
     public JSONObject toJson() {
         return new JSONObject()
                 .put("id", id)

@@ -43,6 +43,14 @@ public class Exercise {
         this.completedDate = completedDate;
     }
 
+    public Exercise(Date time, int sets, int reps, float weight, Date completedDate) {
+        this.time = time;
+        this.sets = sets;
+        this.reps = reps;
+        this.weight = weight;
+        this.completedDate = completedDate;
+    }
+
     public JSONObject toJson() {
         JSONObject json = new JSONObject()
                 .put("id", id)
