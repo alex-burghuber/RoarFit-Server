@@ -1,48 +1,20 @@
-package data.entities;
+package data.dto;
 
-import org.json.JSONObject;
+public class CreateClientDTO {
 
-import javax.persistence.*;
-
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@Entity
-public class User {
-
-    @Id
-    @GeneratedValue
-    private long id;
-
-    @Column(unique = true)
     private String username;
-
     private String password;
     private String firstName;
     private String lastName;
 
-    public User() {
+    public CreateClientDTO() {
     }
 
-    public User(String username, String password, String firstName, String lastName) {
+    public CreateClientDTO(String username, String password, String firstName, String lastName) {
         this.username = username;
         this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
-    }
-
-    public JSONObject toJson() {
-        return new JSONObject()
-                .put("id", id)
-                .put("username", username)
-                .put("firstName", firstName)
-                .put("lastName", lastName);
-    }
-
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
     }
 
     public String getUsername() {

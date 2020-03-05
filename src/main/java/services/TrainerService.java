@@ -1,5 +1,6 @@
 package services;
 
+import data.dto.CreateClientDTO;
 import data.dto.LoginDTO;
 import repositories.TrainerRepository;
 
@@ -28,6 +29,25 @@ public class TrainerService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getClients(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth) {
         return repository.getClients(getJwt(auth));
+    }
+
+    @Path("/clients")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    public Response createClient(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, CreateClientDTO createClientDTO) {
+        return repository.createClient(getJwt(auth), createClientDTO);
+    }
+
+    @Path("/clients/{memberId}")
+    @PUT
+    public Response addClient(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("memberId") long memberId) {
+        return repository.addClient(getJwt(auth), memberId);
+    }
+
+    @Path("/clients/{memberId}")
+    @DELETE
+    public Response removeClient(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("memberId") long memberId) {
+        return repository.removeClient(getJwt(auth), memberId);
     }
 
     private String getJwt(String auth) {

@@ -5,14 +5,14 @@ import org.json.JSONObject;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Trainer extends User {
 
     @OneToMany(cascade = CascadeType.PERSIST)
-    private List<StudioMember> clients = new ArrayList<>();
+    private Set<StudioMember> clients = new HashSet<>();
 
     public Trainer() {
     }
@@ -76,11 +76,11 @@ public class Trainer extends User {
         super.setLastName(lastName);
     }
 
-    public List<StudioMember> getClients() {
+    public Set<StudioMember> getClients() {
         return clients;
     }
 
-    public void setClients(List<StudioMember> clients) {
+    public void setClients(Set<StudioMember> clients) {
         this.clients = clients;
     }
 }
