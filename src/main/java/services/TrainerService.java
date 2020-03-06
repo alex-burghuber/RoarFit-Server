@@ -66,6 +66,14 @@ public class TrainerService {
         return repository.addWorkoutPlan(getJwt(auth), memberId, workoutPlanDTO);
     }
 
+    /*@Path("/workoutplan/{memberId}/{workoutPlanId}")
+    @PUT
+    public Response updateWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
+                                      @PathParam("memberId") long memberId, @PathParam("workoutPlanId") long workoutPlanId,
+                                      WorkoutPlanDTO workoutPlanDTO) {
+        return repository.updateWorkoutPlan(getJwt(auth), memberId, workoutPlanId, workoutPlanDTO);
+    }*/
+
     @Path("/workoutplan/{memberId}/{workoutPlanId}")
     @DELETE
     public Response archiveWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,

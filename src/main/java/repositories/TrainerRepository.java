@@ -295,6 +295,48 @@ public class TrainerRepository {
         return Response.status(Response.Status.FORBIDDEN).build();
     }
 
+    /*public Response updateWorkoutPlan(String jwt, long memberId, long workoutPlanId, WorkoutPlanDTO workoutPlanDTO) {
+        Trainer trainer = getTrainerFromJwt(jwt);
+
+        List<StudioMember> studioMembers = getClientsOfTrainer(memberId, trainer.getId());
+
+        if (!studioMembers.isEmpty()) {
+            StudioMember studioMember = studioMembers.get(0);
+
+            String query = "SELECT w FROM WorkoutPlan w " +
+                    "JOIN StudioMember m ON m.id = :memberId " +
+                    "WHERE w.id = :workoutPlanId " +
+                    "AND w MEMBER OF m.workoutPlans " +
+                    "AND w.archived = false";
+            List<WorkoutPlan> workoutPlans = em.createQuery(query, WorkoutPlan.class)
+                    .setParameter("memberId", studioMember.getId())
+                    .setParameter("workoutPlanId", workoutPlanId)
+                    .getResultList();
+
+            if (!workoutPlans.isEmpty()) {
+                WorkoutPlan workoutPlan = workoutPlans.get(0);
+
+                SimpleDateFormat formatter = TimeFormatHelper.getInstance().formatter;
+                try {
+                    em.getTransaction().begin();
+                    workoutPlan.setName(workoutPlanDTO.getName());
+                    workoutPlan.setInfo(workoutPlanDTO.getInfo());
+                    workoutPlan.setWarmup(formatter.parse(workoutPlanDTO.getWarmup()));
+                    workoutPlan.setCooldown(formatter.parse(workoutPlanDTO.getCooldown()));
+
+
+
+                    em.getTransaction().commit();
+                    return Response.ok().build();
+                } catch (ParseException e) {
+                    return Response.status(Response.Status.BAD_REQUEST).build();
+                }
+            }
+        }
+
+        return Response.status(Response.Status.FORBIDDEN).build();
+    }*/
+
     private List<StudioMember> getClientsOfTrainer(long memberId, long trainerId) {
         String queryGetMember = "SELECT m FROM StudioMember m JOIN Trainer t ON t.id = :trainerId WHERE m.id = :memberId";
         return em.createQuery(queryGetMember, StudioMember.class)
