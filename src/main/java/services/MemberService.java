@@ -11,6 +11,9 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Provider;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 @Provider
 @Path("/member")
@@ -74,6 +77,21 @@ public class MemberService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response getExerciseHistory(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("count") int count) {
         return repository.getExerciseHistory(getJwt(auth), count);
+    }
+
+    /* Part of Medt-Android Project */
+
+    @Path("/exercises")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getExercisesOfWeek(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @QueryParam("date") String dateStr) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+            Date date = formatter.parse(dateStr);
+            return repository.getExercisesOfWeek(getJwt(auth), date);
+        } catch (ParseException e) {
+            return Response.status(Response.Status.BAD_REQUEST).build();
+        }
     }
 
     private String getJwt(String auth) {

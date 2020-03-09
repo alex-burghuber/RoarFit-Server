@@ -19,6 +19,7 @@ import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -204,7 +205,7 @@ public class MemberRepository {
     public Response getExerciseHistory(String jwt, int count) {
         StudioMember member = getMemberFromJwt(jwt);
 
-        // get exercises from workout plans
+        // get exercises of studio member
         String query = "SELECT e FROM Exercise e " +
                 "WHERE e IN (" +
                 "SELECT e FROM Exercise e JOIN StudioMember m ON m.id = :memberId " +
@@ -223,6 +224,49 @@ public class MemberRepository {
                 .setParameter("memberId", member.getId())
                 .setFirstResult(count * 15)
                 .setMaxResults(15)
+                .getResultList();
+
+        JSONArray exerciseJA = new JSONArray();
+        for (Exercise exercise : exercises) {
+            exerciseJA.put(exercise.toJson());
+        }
+
+        return Response.ok(exerciseJA.toString()).build();
+    }
+
+    /* Part of Medt-Android Project */
+
+    public Response getExercisesOfWeek(String jwt, Date date) {
+        StudioMember member = getMemberFromJwt(jwt);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
+        Date weekStart = calendar.getTime();
+
+        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
+        Date weekEnd = calendar.getTime();
+
+        String query = "SELECT e FROM Exercise e " +
+                "WHERE (e.completedDate BETWEEN :weekStart AND :weekEnd) AND " +
+                "(e IN (" +
+                "SELECT e FROM Exercise e JOIN StudioMember m ON m.id = :memberId " +
+                "WHERE e MEMBER OF m.personalExercises) " +
+                "OR e IN (" +
+                "SELECT e FROM Exercise e " +
+                "JOIN ExerciseSpecification s ON s.exercise = e " +
+                "JOIN Workout w " +
+                "JOIN WorkoutPlan p " +
+                "JOIN StudioMember m ON m.id = :memberId " +
+                "WHERE s MEMBER OF w.specifications " +
+                "AND w MEMBER OF p.workouts " +
+                "AND p MEMBER OF m.workoutPlans " +
+                "AND e.completedDate != null))";
+        List<Exercise> exercises = em.createQuery(query, Exercise.class)
+                .setParameter("memberId", member.getId())
+                .setParameter("weekStart", weekStart)
+                .setParameter("weekEnd", weekEnd)
                 .getResultList();
 
         JSONArray exerciseJA = new JSONArray();
