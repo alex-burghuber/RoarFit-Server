@@ -81,10 +81,10 @@ public class MemberService {
 
     /* Part of Medt-Android Project */
 
-    @Path("/exercises")
+    @Path("/exercises/{date}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getExercisesOfWeek(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @QueryParam("date") String dateStr) {
+    public Response getExercisesOfWeek(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("date") String dateStr) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         try {
             Date date = formatter.parse(dateStr);

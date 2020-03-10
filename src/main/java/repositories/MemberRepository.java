@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static utils.Constants.VM_MEDIA_URI;
 
@@ -240,6 +241,8 @@ public class MemberRepository {
         StudioMember member = getMemberFromJwt(jwt);
 
         Calendar calendar = Calendar.getInstance();
+        // set first day of week for hosts (like the vm) where the first day of the week may start on a sunday
+        calendar.setFirstDayOfWeek(Calendar.MONDAY);
         calendar.setTime(date);
 
         calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
@@ -249,8 +252,7 @@ public class MemberRepository {
         Date weekEnd = calendar.getTime();
 
         String query = "SELECT e FROM Exercise e " +
-                "WHERE (e.completedDate BETWEEN :weekStart AND :weekEnd) AND " +
-                "(e IN (" +
+                "WHERE e IN (" +
                 "SELECT e FROM Exercise e JOIN StudioMember m ON m.id = :memberId " +
                 "WHERE e MEMBER OF m.personalExercises) " +
                 "OR e IN (" +
@@ -262,12 +264,15 @@ public class MemberRepository {
                 "WHERE s MEMBER OF w.specifications " +
                 "AND w MEMBER OF p.workouts " +
                 "AND p MEMBER OF m.workoutPlans " +
-                "AND e.completedDate != null))";
+                "AND e.completedDate != null)";
         List<Exercise> exercises = em.createQuery(query, Exercise.class)
                 .setParameter("memberId", member.getId())
-                .setParameter("weekStart", weekStart)
-                .setParameter("weekEnd", weekEnd)
                 .getResultList();
+
+        exercises = exercises.stream()
+                .filter(exercise -> weekStart.compareTo(exercise.getCompletedDate()) < 0)
+                .filter(exercise -> weekEnd.compareTo(exercise.getCompletedDate()) > 0)
+                .collect(Collectors.toList());
 
         JSONArray exerciseJA = new JSONArray();
         for (Exercise exercise : exercises) {
