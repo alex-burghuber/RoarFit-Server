@@ -76,21 +76,23 @@ public class MemberRepository {
 
         JSONArray plansJA = new JSONArray();
         for (WorkoutPlan plan : member.getWorkoutPlans()) {
-            JSONObject planJO = plan.toJson();
+            if (!plan.isArchived()) {
+                JSONObject planJO = plan.toJson();
 
-            JSONArray workoutsJA = new JSONArray();
-            for (Workout workout : plan.getWorkouts()) {
-                JSONObject workoutJO = workout.toJson();
+                JSONArray workoutsJA = new JSONArray();
+                for (Workout workout : plan.getWorkouts()) {
+                    JSONObject workoutJO = workout.toJson();
 
-                JSONArray specificationsJA = new JSONArray();
-                for (ExerciseSpecification specification : workout.getSpecifications()) {
-                    specificationsJA.put(specification.toJson());
+                    JSONArray specificationsJA = new JSONArray();
+                    for (ExerciseSpecification specification : workout.getSpecifications()) {
+                        specificationsJA.put(specification.toJson());
+                    }
+                    workoutJO.put("specifications", specificationsJA);
+                    workoutsJA.put(workoutJO);
                 }
-                workoutJO.put("specifications", specificationsJA);
-                workoutsJA.put(workoutJO);
+                planJO.put("workouts", workoutsJA);
+                plansJA.put(planJO);
             }
-            planJO.put("workouts", workoutsJA);
-            plansJA.put(planJO);
         }
         return Response.ok(plansJA.toString()).build();
     }
