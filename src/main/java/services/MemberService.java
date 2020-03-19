@@ -84,11 +84,11 @@ public class MemberService {
     @Path("/exercises/{date}")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getExercisesOfWeek(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("date") String dateStr) {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
+    public Response getExercisesOfMonth(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth, @PathParam("date") String dateStr) {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM");
         try {
             Date date = formatter.parse(dateStr);
-            return repository.getExercisesOfWeek(getJwt(auth), date);
+            return repository.getExercisesOfMonth(getJwt(auth), date);
         } catch (ParseException e) {
             return Response.status(Response.Status.BAD_REQUEST).build();
         }

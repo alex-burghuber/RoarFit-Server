@@ -239,19 +239,20 @@ public class MemberRepository {
 
     /* Part of Medt-Android Project */
 
-    public Response getExercisesOfWeek(String jwt, Date date) {
+    public Response getExercisesOfMonth(String jwt, Date date) {
         StudioMember member = getMemberFromJwt(jwt);
 
         Calendar calendar = Calendar.getInstance();
-        // set first day of week for hosts (like the vm) where the first day of the week may start on a sunday
-        calendar.setFirstDayOfWeek(Calendar.MONDAY);
         calendar.setTime(date);
 
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY);
-        Date weekStart = calendar.getTime();
+        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        Date monthStart = calendar.getTime();
 
-        calendar.set(Calendar.DAY_OF_WEEK, Calendar.SUNDAY);
-        Date weekEnd = calendar.getTime();
+        int monthMax = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        calendar.set(Calendar.DAY_OF_MONTH, monthMax);
+        Date monthEnd = calendar.getTime();
+
+        System.out.println("MonthStart: " + monthStart + "MonthEnd: " + monthEnd);
 
         String query = "SELECT e FROM Exercise e " +
                 "WHERE e IN (" +
@@ -272,8 +273,8 @@ public class MemberRepository {
                 .getResultList();
 
         exercises = exercises.stream()
-                .filter(exercise -> weekStart.compareTo(exercise.getCompletedDate()) < 0)
-                .filter(exercise -> weekEnd.compareTo(exercise.getCompletedDate()) > 0)
+                .filter(exercise -> monthStart.compareTo(exercise.getCompletedDate()) < 0)
+                .filter(exercise -> monthEnd.compareTo(exercise.getCompletedDate()) > 0)
                 .collect(Collectors.toList());
 
         JSONArray exerciseJA = new JSONArray();
