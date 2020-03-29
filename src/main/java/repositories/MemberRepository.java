@@ -6,6 +6,7 @@ import data.entities.*;
 import helper.EntityManagerHelper;
 import helper.JwtHelper;
 import helper.TimeFormatHelper;
+import org.bouncycastle.util.encoders.Hex;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -16,6 +17,9 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -55,12 +59,19 @@ public class MemberRepository {
             StudioMember member = results.get(0);
 
             // check if the password is correct
-            if (member.getPassword().equals(password)) {
+            try {
+                MessageDigest md = MessageDigest.getInstance("SHA-256");
+                md.update(Hex.decode(member.getSalt()));
+                byte[] hash = md.digest(password.getBytes(StandardCharsets.UTF_8));
 
-                String jwt = jwtHelper.create(member.getId());
-                JSONObject json = new JSONObject()
-                        .put("token", jwt);
-                return Response.ok(json.toString()).build();
+                if (new String(Hex.encode(hash)).equals(member.getPassword())) {
+                    String jwt = jwtHelper.create(member.getId());
+                    JSONObject json = new JSONObject()
+                            .put("token", jwt);
+                    return Response.ok(json.toString()).build();
+                }
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
             }
         }
         return Response.status(Response.Status.UNAUTHORIZED).build();
@@ -112,8 +123,11 @@ public class MemberRepository {
         // for jwt validation
         getMemberFromJwt(jwt);
 
-        String query = "SELECT t FROM ExerciseTemplate t WHERE LOWER(t.equipment) = LOWER(:equipment)" +
-                " AND t.id != ALL (SELECT s.exercise.template.id FROM ExerciseSpecification s)";
+        String query = "SELECT t FROM ExerciseTemplate t " +
+                "WHERE LOWER(t.equipment) = LOWER(:equipment) " +
+                "AND t.id != ALL (" +
+                "SELECT s.exercise.template.id FROM ExerciseSpecification s" +
+                ")";
         List<ExerciseTemplate> templates = em.createQuery(query, ExerciseTemplate.class)
                 .setParameter("equipment", equipment)
                 .getResultList();
@@ -339,11 +353,11 @@ public class MemberRepository {
         StudioMember member2 = new StudioMember("Pfeff", "PfeffPwd", "Mr", "Pepper");
         StudioMember member3 = new StudioMember("GhostMember", "spookyPwd", "TheStudioElite", "BornToCompete");
 
-        Trainer trainer1 = new Trainer("To train or not to train", "trainPwd1", "Genericus", "Trainerus");
+        Trainer trainer1 = new Trainer("Trainer1", "trainPwd1", "Genericus", "Trainerus");
         trainer1.getClients().add(member1);
         trainer1.getClients().add(member2);
 
-        Trainer trainer2 = new Trainer("Tschu Tschu", "trainPwd2", "Ilike", "Trains");
+        Trainer trainer2 = new Trainer("Trainer2", "trainPwd2", "Ilike", "Trains");
         trainer2.getClients().add(member3);
 
         em.getTransaction().begin();
