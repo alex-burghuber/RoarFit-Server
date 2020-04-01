@@ -66,14 +66,6 @@ public class TrainerService {
         return repository.addWorkoutPlan(getJwt(auth), memberId, workoutPlanDTO);
     }
 
-    /*@Path("/workoutplan/{memberId}/{workoutPlanId}")
-    @PUT
-    public Response updateWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
-                                      @PathParam("memberId") long memberId, @PathParam("workoutPlanId") long workoutPlanId,
-                                      WorkoutPlanDTO workoutPlanDTO) {
-        return repository.updateWorkoutPlan(getJwt(auth), memberId, workoutPlanId, workoutPlanDTO);
-    }*/
-
     @Path("/workoutplan/{memberId}/{workoutPlanId}")
     @DELETE
     public Response archiveWorkoutPlan(@HeaderParam(HttpHeaders.AUTHORIZATION) String auth,
@@ -83,7 +75,10 @@ public class TrainerService {
 
     private String getJwt(String auth) {
         if (auth != null) {
-            return auth.split("\\s")[1];
+            String[] split = auth.split("\\s");
+            if (split.length > 1) {
+                return split[1];
+            }
         }
         throw new WebApplicationException(Response.Status.UNAUTHORIZED);
     }

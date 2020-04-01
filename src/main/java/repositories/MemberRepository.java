@@ -126,8 +126,7 @@ public class MemberRepository {
         String query = "SELECT t FROM ExerciseTemplate t " +
                 "WHERE LOWER(t.equipment) = LOWER(:equipment) " +
                 "AND t.id != ALL (" +
-                "SELECT s.exercise.template.id FROM ExerciseSpecification s" +
-                ")";
+                "SELECT s.exercise.template.id FROM ExerciseSpecification s)";
         List<ExerciseTemplate> templates = em.createQuery(query, ExerciseTemplate.class)
                 .setParameter("equipment", equipment)
                 .getResultList();
@@ -395,12 +394,13 @@ public class MemberRepository {
 
         ExerciseTemplate template1 = new ExerciseTemplate("Kniebeuge", "Beine");
         template1.setDescription("Die Kniebeuge ist eine sportliche Übung zur Kräftigung der Muskulatur, insbesondere der Oberschenkelmuskulatur.");
-        template1.setVideoUrl(VM_MEDIA_URI + "tea.mp4");
+        template1.setEquipment("Langhantel");
         Exercise exercise1 = new Exercise(template1);
         ExerciseSpecification specification1 = new ExerciseSpecification(exercise1, 3, 5, 45f);
         specification1.setInfo("Never skip leg day.");
 
         ExerciseTemplate template2 = new ExerciseTemplate("Bankdrücken (20)", "Brust");
+        template2.setVideoUrl(VM_MEDIA_URI + "bench_press.mp4");
         template2.setEquipment("Langhantel");
         Exercise exercise2 = new Exercise(template2);
         ExerciseSpecification specification2 = new ExerciseSpecification(exercise2, 3, 5, 32.5f);

@@ -96,7 +96,10 @@ public class MemberService {
 
     private String getJwt(String auth) {
         if (auth != null) {
-            return auth.split("\\s")[1];
+            String[] split = auth.split("\\s");
+            if (split.length > 1) {
+                return split[1];
+            }
         }
         throw new WebApplicationException(Response.Status.UNAUTHORIZED);
     }
